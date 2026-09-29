@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070d18">
+  <meta name="description" content="Code Cosmos — explainable AI-assisted material code harmonization for CPSEs. Smart India Hackathon 2026, SIH26099.">
+  <title>Code Cosmos — Material Intelligence</title>
+  <link rel="icon" href="/static/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/css/styles.css">
+  <script src="/static/js/app.js" defer></script>
+</head>
+<body>
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon-sprite" aria-hidden="true">
+    <symbol id="i-orbit" viewBox="0 0 24 24"><circle cx="12" cy="12" r="2.6" fill="currentColor" stroke="none"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(-35 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="4.3" transform="rotate(35 12 12)"/></symbol>
+    <symbol id="i-grid" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></symbol>
+    <symbol id="i-layers" viewBox="0 0 24 24"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5M3 16l9 5 9-5"/></symbol>
+    <symbol id="i-merge" viewBox="0 0 24 24"><path d="M5 3v4a5 5 0 0 0 5 5h4a5 5 0 0 1 5 5v4M19 3v4a5 5 0 0 1-5 5h-4a5 5 0 0 0-5 5v4"/><path d="m16 18 3 3 3-3M2 18l3 3 3-3"/></symbol>
+    <symbol id="i-database" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="m12 2 1.8 6.2L20 10l-6.2 1.8L12 18l-1.8-6.2L4 10l6.2-1.8L12 2ZM19 16l.7 2.3L22 19l-2.3.7L19 22l-.7-2.3L16 19l2.3-.7L19 16Z"/></symbol>
+    <symbol id="i-route" viewBox="0 0 24 24"><circle cx="5" cy="5" r="2"/><circle cx="19" cy="19" r="2"/><path d="M7 5h7a5 5 0 0 1 0 10h-4a4 4 0 0 0 0 8h7"/></symbol>
+    <symbol id="i-settings" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="m10 2-.4 2.2-2 .9-1.9-1.2L3.8 6l1.2 1.9-.9 2L2 10v4l2.1.4.9 2-1.2 1.9 1.9 1.9 1.9-1.2 2 .9L10 22h4l.4-2.1 2-.9 1.9 1.2 1.9-1.9-1.2-1.9.9-2L22 14v-4l-2.1-.4-.9-2L20.2 6l-1.9-1.9-1.9 1.2-2-.9L14 2h-4Z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M5 19 19 5M8 5h11v11"/></symbol>
+    <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V3m-5 5 5-5 5 5M3 16v3a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v13m-5-5 5 5 5-5M3 17v3a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1v-3"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m4 12 5 5L20 6"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="m12 2 9 4v6c0 5.4-3.4 8.3-9 10-5.6-1.7-9-4.6-9-10V6l9-4Z"/><path d="m8 12 3 3 5-6"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M5 5 19 19M19 5 5 19"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2 6M20 4v7h-7"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M6 2h8l5 5v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V3a1 1 0 0 1 1-1Z"/><path d="M14 2v6h5M8 13h8M8 17h6"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 11v6M12 7h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="m12 3 10 18H2L12 3Z"/><path d="M12 9v5M12 18h.01"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m8 5 11 7-11 7V5Z"/></symbol>
+  </svg>
+
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Primary navigation">
+      <div class="sidebar-inner">
+        <a class="brand" href="#overview" aria-label="Code Cosmos home">
+          <span class="brand-mark"><svg class="icon"><use href="#i-orbit"/></svg></span>
+          <span class="brand-type"><strong>CODE<span>COSMOS</span></strong><small>MATERIAL INTELLIGENCE</small></span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <div class="nav-group-label">WORKSPACE <span>01 / 02</span></div>
+        <nav class="nav-group" aria-label="Workspace">
+          <button class="nav-item is-active" data-nav="overview"><svg class="icon"><use href="#i-grid"/></svg><span>Overview</span><span class="nav-active-bar"></span></button>
+          <button class="nav-item" data-nav="harmonize"><svg class="icon"><use href="#i-layers"/></svg><span>Harmonize</span></button>
+          <button class="nav-item" data-nav="review"><svg class="icon"><use href="#i-merge"/></svg><span>Review queue</span><span class="nav-count" id="queueBadge">0</span></button>
+          <button class="nav-item" data-nav="master"><svg class="icon"><use href="#i-database"/></svg><span>Material master</span></button>
+          <button class="nav-item" data-nav="lab"><svg class="icon"><use href="#i-sparkle"/></svg><span>Intelligence lab</span></button>
+        </nav>
+        <div class="nav-group-label nav-group-label-second">EXPLORE <span>02 / 02</span></div>
+        <nav class="nav-group" aria-label="Explore">
+          <button class="nav-item" data-nav="method"><svg class="icon"><use href="#i-route"/></svg><span>How it works</span></button>
+          <button class="nav-item" data-nav="settings"><svg class="icon"><use href="#i-settings"/></svg><span>Integration</span></button>
+        </nav>
+        <div class="sidebar-spacer"></div>
+        <div class="sidebar-feature">
+          <div class="sidebar-feature-icon"><svg class="icon"><use href="#i-shield"/></svg></div>
+          <strong>Built for certainty.</strong>
+          <p>AI proposes. Technical specs protect. Experts decide.</p>
+          <button class="text-link" data-nav="method">Explore the approach <svg class="icon"><use href="#i-arrow"/></svg></button>
+        </div>
+        <div class="sidebar-profile">
+          <span class="profile-avatar">CC</span>
+          <span><strong>Team Code Cosmos</strong><small>SIH 2026 · Software</small></span>
+          <span class="profile-status" title="Prototype online"></span>
+        </div>
+      </div>
+    </aside>
+    <button class="sidebar-scrim" id="sidebarScrim" aria-label="Close navigation" hidden></button>
+
+    <div class="content-shell">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu icon-button" id="mobileMenu" aria-label="Open navigation"><svg class="icon"><use href="#i-menu"/></svg></button>
+          <div class="breadcrumb"><span>PLATFORM</span><span class="slash">/</span><span id="breadcrumbPage">OVERVIEW</span></div>
+          <div class="topbar-subtitle" id="topbarSubtitle">A single source of material truth.</div>
+        </div>
+        <div class="topbar-right">
+          <span class="topbar-edition">SIH<span> / </span>26099</span>
+          <button class="integration-pill" data-nav="settings" id="integrationPill"><span class="status-led"></span><span id="integrationLabel">Checking engine</span><svg class="icon"><use href="#i-chevron"/></svg></button>
+          <button class="btn btn-primary btn-top" data-action="analyze"><svg class="icon"><use href="#i-sparkle"/></svg><span>Run analysis</span></button>
+        </div>
+      </header>
+
+      <main id="mainContent">
+        <!-- OVERVIEW -->
+        <section class="page is-active" data-page="overview" aria-labelledby="overviewTitle">
+          <div class="hero-panel">
+            <div class="hero-noise" aria-hidden="true"></div>
+            <div class="hero-copy">
+              <div class="eyebrow"><span class="eyebrow-line"></span> SMART INDIA HACKATHON 2026 <span class="eyebrow-sep">/</span> PS SIH26099</div>
+              <h1 id="overviewTitle">One material.<br><span>One language.</span></h1>
+              <p>Bring fragmented CPSE material records into focus. Find the real matches, protect the critical specifications, and build a master you can trust.</p>
+              <div class="hero-actions">
+                <button class="btn btn-primary btn-large" data-nav="harmonize">Start harmonizing <svg class="icon"><use href="#i-arrow"/></svg></button>
+                <button class="btn btn-quiet btn-large" data-nav="lab"><svg class="icon"><use href="#i-play"/></svg> Try a live comparison</button>
+              </div>
+              <div class="hero-foot"><div class="avatar-stack"><span>O</span><span>B</span><span>N</span><span>S</span></div><span>One intelligence layer across every source.</span></div>
+            </div>
+            <div class="hero-visual" aria-hidden="true">
+              <div class="visual-grid"></div><div class="visual-halo"></div>
+              <div class="orbit orbit-one"><span class="orbit-dot"></span></div>
+              <div class="orbit orbit-two"><span class="orbit-dot"></span></div>
+              <div class="orbit orbit-three"></div>
+              <div class="orbit-core"><div class="core-shimmer"></div><span class="core-label">MATERIAL / 01</span><svg class="icon core-symbol"><use href="#i-orbit"/></svg><span class="core-caption">SINGLE SOURCE<br>OF TRUTH</span></div>
+              <div class="floating-tag tag-a"><span class="tag-dot amber"></span><span>RAW INPUT<br><strong>BEARING 6205</strong></span></div>
+              <div class="floating-tag tag-b"><span class="tag-dot violet"></span><span>VARIANT FOUND<br><strong>6205 BALL BEARING</strong></span></div>
+              <div class="floating-tag tag-c"><svg class="icon"><use href="#i-check"/></svg><span>SPEC VERIFIED</span></div>
+              <div class="visual-caption"><span class="live-pulse"></span> HARMONIZATION ENGINE <span class="caption-index">// ACTIVE</span></div>
+            </div>
+          </div>
+
+          <div class="section-intro intro-tight"><div><div class="section-kicker">THE BIG PICTURE</div><h2>A clearer picture, instantly<span class="period">.</span></h2><p>Your material landscape, made actionable.</p></div><span class="section-aside">LIVE WORKSPACE DATA <span class="tiny-dot"></span></span></div>
+          <div class="metrics-grid">
+            <div class="metric-card"><div class="metric-top"><span class="metric-icon blue"><svg class="icon"><use href="#i-layers"/></svg></span><span class="metric-index">01 / INGESTED</span></div><strong class="metric-number" id="metricRecords">—</strong><span class="metric-label">Material records</span><div class="metric-bottom"><span class="metric-trend"><svg class="icon"><use href="#i-arrow-up"/></svg></span> From <span id="metricSources">—</span> sources</div></div>
+            <div class="metric-card"><div class="metric-top"><span class="metric-icon purple"><svg class="icon"><use href="#i-merge"/></svg></span><span class="metric-index">02 / DISCOVERED</span></div><strong class="metric-number" id="metricCandidates">—</strong><span class="metric-label">Candidate matches</span><div class="metric-bottom"><span class="metric-trend"><svg class="icon"><use href="#i-arrow-up"/></svg></span> Spec-safe suggestions</div></div>
+            <div class="metric-card"><div class="metric-top"><span class="metric-icon amber"><svg class="icon"><use href="#i-clock"/></svg></span><span class="metric-index">03 / ACTION NEEDED</span></div><strong class="metric-number" id="metricPending">—</strong><span class="metric-label">Awaiting review</span><div class="metric-bottom"><span class="metric-trend amber-text"><span class="tiny-dot"></span></span> Human decision required</div></div>
+            <div class="metric-card"><div class="metric-top"><span class="metric-icon mint"><svg class="icon"><use href="#i-shield"/></svg></span><span class="metric-index">04 / VALIDATED</span></div><strong class="metric-number" id="metricApproved">—</strong><span class="metric-label">Expert-approved links</span><div class="metric-bottom"><span class="metric-trend"><svg class="icon"><use href="#i-check"/></svg></span> <span id="metricMapped">0</span> with a reference code</div></div>
+          </div>
+
+          <div class="overview-grid">
+            <div class="panel matches-panel"><div class="panel-heading"><div><div class="section-kicker">MATCH INTELLIGENCE</div><h3>Worth a closer look</h3><p>Strongest candidates from your current workspace.</p></div><button class="icon-text-link" data-nav="review">Review all <svg class="icon"><use href="#i-arrow-up"/></svg></button></div><div id="overviewMatches" class="overview-match-list"><div class="loading-placeholder">Loading candidates…</div></div></div>
+            <div class="panel signals-panel"><div class="section-kicker">TRUST, NOT GUESSWORK</div><h3>Evidence behind<br>every match.</h3><p class="signals-copy">A recommendation is only as good as the technical facts behind it.</p><div class="score-feature"><div class="score-dial" id="topScoreDial" style="--score:0"><strong id="topScore">—</strong><span>TOP SCORE</span></div><div class="score-feature-text"><strong>Hybrid intelligence</strong><span>Normalized vectors + fuzzy text + verified specifications.</span></div></div><div class="signal-mini-bars" id="signalBars"><div class="signal-mini-row"><span>Normalized vector</span><div><i style="width:0%"></i></div><b>—</b></div><div class="signal-mini-row"><span>Fuzzy similarity</span><div><i style="width:0%"></i></div><b>—</b></div><div class="signal-mini-row"><span>Technical fit</span><div><i style="width:0%"></i></div><b>—</b></div></div><div class="signal-footnote"><svg class="icon"><use href="#i-info"/></svg> Match scores are explainable heuristics, not calibrated probabilities.</div></div>
+          </div>
+
+          <div class="guardrail-banner"><div class="guardrail-emblem"><svg class="icon"><use href="#i-shield"/></svg></div><div><div class="section-kicker">THE NON-NEGOTIABLE</div><h3>Similar words. Different specifications.</h3><p>“Bearing 6205” and “Bearing 6206” look alike. A designation mismatch blocks the recommendation — even if an AI model says otherwise.</p></div><button class="btn btn-outline" data-action="guardrail">Test the guardrail <svg class="icon"><use href="#i-arrow"/></svg></button><span class="banner-art" aria-hidden="true">6205 != 6206</span></div>
+
+          <div class="section-intro"><div><div class="section-kicker">FROM CHAOS TO CLARITY</div><h2>One continuous flow<span class="period">.</span></h2><p>Every step connects discovery to a defensible material master.</p></div><button class="icon-text-link" data-nav="method">Explore methodology <svg class="icon"><use href="#i-arrow-up"/></svg></button></div>
+          <div class="flow-grid"><div class="flow-card"><span class="flow-index">01</span><span class="flow-glyph"><svg class="icon"><use href="#i-layers"/></svg></span><strong>Ingest</strong><p>Bring records from every CPSE into one workspace.</p></div><div class="flow-card"><span class="flow-index">02</span><span class="flow-glyph"><svg class="icon"><use href="#i-sparkle"/></svg></span><strong>Understand</strong><p>Normalize text and extract engineering attributes.</p></div><div class="flow-card"><span class="flow-index">03</span><span class="flow-glyph"><svg class="icon"><use href="#i-merge"/></svg></span><strong>Match</strong><p>Blend vector, fuzzy and technical evidence.</p></div><div class="flow-card"><span class="flow-index">04</span><span class="flow-glyph"><svg class="icon"><use href="#i-shield"/></svg></span><strong>Validate</strong><p>Experts approve or reject with an audit trail.</p></div><div class="flow-card"><span class="flow-index">05</span><span class="flow-glyph"><svg class="icon"><use href="#i-database"/></svg></span><strong>Harmonize</strong><p>Link to a reference code and export the master.</p></div></div>
+          <div class="bottom-strip"><div><span class="strip-sparkle"><svg class="icon"><use href="#i-orbit"/></svg></span><div><strong>Good data makes better decisions.</strong><span>Created for the people who keep India's public enterprises moving.</span></div></div><span>TEAM CODE COSMOS <span class="strip-sep">/</span> SIH 2026</span></div>
+        </section>
+
+        <!-- HARMONIZE -->
+        <section class="page" data-page="harmonize" aria-labelledby="harmonizeTitle" hidden>
+          <div class="page-heading"><div><div class="section-kicker">01 / THE WORKSPACE</div><h1 id="harmonizeTitle">Make the messy <span>meaningful.</span></h1><p>Import material descriptions, inspect extracted attributes, and run the harmonization engine.</p></div><span class="heading-ornament">INPUT / INTELLIGENCE</span></div>
+          <div class="workspace-top-grid"><div class="panel import-panel"><div class="panel-heading"><div><div class="section-kicker">YOUR DATA, YOUR WORKSPACE</div><h3>Import material records</h3><p>Start with a CSV. We take care of the first pass.</p></div><span class="panel-step">01 / 02</span></div><input type="file" id="materialFile" accept=".csv,text/csv" hidden><div class="dropzone" id="materialDrop" role="button" tabindex="0" aria-label="Select or drop material CSV"><div class="drop-icon"><svg class="icon"><use href="#i-upload"/></svg></div><strong>Drop a CSV file here</strong><span>or <span class="highlight-link">browse your files</span> to get started</span><small id="selectedMaterialFile">UTF-8 CSV · MAX 2 MB · UP TO 1,000 ROWS</small></div><div class="import-mode-row"><label for="importMode">IMPORT BEHAVIOR</label><select id="importMode" class="select-compact"><option value="replace">Replace current workspace</option><option value="append">Add to current workspace</option></select></div><div class="import-actions"><button class="btn btn-primary" id="importMaterials" disabled><svg class="icon"><use href="#i-upload"/></svg> <span id="importButtonLabel">Import &amp; replace workspace</span></button><a class="subtle-link" href="/api/templates/materials.csv"><svg class="icon"><use href="#i-download"/></svg> Download template</a></div><div class="inline-note"><svg class="icon"><use href="#i-info"/></svg><span id="importModeHelp">Columns: <code>description</code> required; <code>source</code> and <code>external_id</code> optional. Replace clears current review decisions but keeps the reference library.</span></div></div>
+          <div class="panel analyze-panel"><div class="panel-heading"><div><div class="section-kicker">THE INTELLIGENCE LAYER</div><h3>Run harmonization</h3><p>Turn a scattered dataset into a review-ready shortlist.</p></div><span class="panel-step">02 / 02</span></div><div class="analyze-flow"><div><span class="step-bubble">1</span><span>Normalize descriptions</span><svg class="icon"><use href="#i-check"/></svg></div><div><span class="step-bubble">2</span><span>Extract &amp; standardize specs</span><svg class="icon"><use href="#i-check"/></svg></div><div><span class="step-bubble">3</span><span>Find safe candidate matches</span><svg class="icon"><use href="#i-check"/></svg></div><div><span class="step-bubble">4</span><span>Enrich with Groq reasoning</span><span class="optional-label">OPTIONAL</span></div></div><label class="toggle-row" for="workspaceUseAi"><span><strong>Use Groq reasoning</strong><small>Sends up to 8 shortlisted description pairs to Groq when configured.</small></span><input type="checkbox" id="workspaceUseAi"><span class="toggle-track" aria-hidden="true"></span></label><button class="btn btn-primary btn-full" id="workspaceAnalyze"><svg class="icon"><use href="#i-sparkle"/></svg> Analyze current dataset <svg class="icon btn-tail"><use href="#i-arrow"/></svg></button><div class="run-summary" id="runSummary">Your most recent run will appear here.</div></div></div>
+          <div class="dataset-section"><div class="section-intro"><div><div class="section-kicker">WHAT'S IN THE SYSTEM</div><h2>Material records<span class="period">.</span></h2><p>See the original wording and the engineering facts extracted from it.</p></div><button class="btn btn-outline btn-sm" id="resetDemo"><svg class="icon"><use href="#i-refresh"/></svg> Restore demo data</button></div><div class="panel table-panel"><div class="table-toolbar"><div class="table-title"><span class="table-live"></span><strong>Current dataset</strong><span class="count-tag" id="recordsCountTag">— records</span></div><div class="table-controls"><label class="search-field"><svg class="icon"><use href="#i-search"/></svg><input id="recordSearch" type="search" placeholder="Search records..." aria-label="Search records"></label><select id="sourceFilter" class="select-compact" aria-label="Filter by source"><option value="">All sources</option></select></div></div><div class="table-scroll"><table class="data-table"><thead><tr><th>ORIGINAL DESCRIPTION</th><th>SOURCE / ID</th><th>EXTRACTED ATTRIBUTES</th><th>STATUS</th></tr></thead><tbody id="recordsBody"><tr><td colspan="4" class="table-empty">Loading records…</td></tr></tbody></table></div><div class="table-footer"><span id="recordsShown">—</span><div class="pagination"><button id="recordsPrev" aria-label="Previous records"><svg class="icon"><use href="#i-arrow"/></svg></button><span id="recordsPageLabel">1 / 1</span><button id="recordsNext" aria-label="Next records"><svg class="icon"><use href="#i-arrow"/></svg></button></div></div></div></div>
+        </section>
+
+        <!-- REVIEW -->
+        <section class="page" data-page="review" aria-labelledby="reviewTitle" hidden>
+          <div class="page-heading"><div><div class="section-kicker">02 / HUMAN IN THE LOOP</div><h1 id="reviewTitle">The final call is <span>yours.</span></h1><p>Inspect the evidence. Validate what belongs together. Leave an audit trail.</p></div><span class="heading-ornament">EVIDENCE / DECISION</span></div>
+          <div class="review-stat-line"><div><span class="review-dot mint"></span><strong id="reviewFastCount">0</strong> fast-track suggestions</div><div><span class="review-dot amber"></span><strong id="reviewPendingCount">0</strong> awaiting a decision</div><div><span class="review-dot violet"></span><strong id="reviewDoneCount">0</strong> decisions made</div><span class="review-stat-note">No recommendation is auto-approved.</span></div>
+          <div class="review-layout"><div class="panel queue-panel"><div class="queue-head"><div><div class="section-kicker">CANDIDATE QUEUE</div><h3>Potential matches <span class="count-tag" id="queueCount">0</span></h3></div><label class="search-field queue-search"><svg class="icon"><use href="#i-search"/></svg><input id="reviewSearch" type="search" placeholder="Search pairs..." aria-label="Search candidate pairs"></label></div><div class="filter-tabs" role="group" aria-label="Filter candidates"><button data-filter="pending" class="is-active">Pending</button><button data-filter="all">All</button><button data-filter="approved">Approved</button><button data-filter="rejected">Rejected</button></div><div class="queue-list" id="reviewList"><div class="loading-placeholder">Loading queue…</div></div></div><div class="panel detail-panel" id="reviewDetail"><div class="empty-detail"><svg class="icon"><use href="#i-merge"/></svg><h3>Select a candidate</h3><p>Its supporting evidence will appear here.</p></div></div></div>
+        </section>
+
+        <!-- MATERIAL MASTER -->
+        <section class="page" data-page="master" aria-labelledby="masterTitle" hidden>
+          <div class="page-heading"><div><div class="section-kicker">03 / THE SINGLE SOURCE OF TRUTH</div><h1 id="masterTitle">Knowledge that <span>compounds.</span></h1><p>Validated links and an importable reference library, ready for reuse and export.</p></div><div class="heading-actions"><a class="btn btn-outline" href="/api/export/audit.csv"><svg class="icon"><use href="#i-download"/></svg> Audit log</a><a class="btn btn-primary" href="/api/export/master.csv"><svg class="icon"><use href="#i-download"/></svg> Export master</a></div></div>
+          <div class="master-summary"><div><span class="summary-icon mint"><svg class="icon"><use href="#i-check"/></svg></span><span><strong id="masterApproved">0</strong><small>Validated links</small></span></div><div><span class="summary-icon violet"><svg class="icon"><use href="#i-database"/></svg></span><span><strong id="masterMapped">0</strong><small>Code assignments</small></span></div><div><span class="summary-icon blue"><svg class="icon"><use href="#i-layers"/></svg></span><span><strong id="masterRefs">0</strong><small>Reference codes</small></span></div><p>Every approved link is traceable to a human decision, not an automatic merge.</p></div>
+          <div class="master-tabs"><button data-master-tab="validated" class="is-active">Validated material master</button><button data-master-tab="references">Reference library</button></div>
+          <div id="validatedView" class="panel master-panel"><div class="panel-heading"><div><div class="section-kicker">EXPERT-VALIDATED</div><h3>Approved relationships</h3><p>These records were explicitly linked by a reviewer.</p></div><span class="count-tag" id="validatedCount">0 validated</span></div><div id="validatedList" class="master-list"></div></div>
+          <div id="referenceView" hidden><div class="reference-warning"><svg class="icon"><use href="#i-info"/></svg><span><strong>Important:</strong> Codes beginning with <code>DEMO-</code> are illustrative placeholders, <em>not official CNMC codes</em>. Import your authorized CNMC/reference catalog to recommend real codes.</span></div><div class="reference-layout"><div class="panel reference-table-panel"><div class="panel-heading"><div><div class="section-kicker">THE CANONICAL LIBRARY</div><h3>Reference codes</h3><p>Recommendations are matched against this library.</p></div><span class="count-tag" id="referenceCount">0 codes</span></div><div id="referenceList" class="reference-list"></div></div><div class="panel reference-upload-panel"><div class="section-kicker">BRING YOUR OWN STANDARD</div><h3>Import a code catalog.</h3><p>Replace the illustrative examples with an authorized reference list. We re-evaluate suggestions against the new codes.</p><a class="subtle-link" href="/api/templates/references.csv"><svg class="icon"><use href="#i-download"/></svg> Download CSV template</a><input id="referenceFile" type="file" accept=".csv,text/csv" hidden><button class="reference-file-button" id="chooseReference"><svg class="icon"><use href="#i-file"/></svg><span id="selectedReferenceFile">Choose a reference CSV</span><svg class="icon"><use href="#i-arrow"/></svg></button><button class="btn btn-primary btn-full" id="importReferences" disabled>Replace reference library <svg class="icon btn-tail"><use href="#i-arrow"/></svg></button><div class="inline-note"><svg class="icon"><use href="#i-info"/></svg><span>Required columns: <code>code</code>, <code>description</code>. Replacing the library clears old code assignments but preserves approval decisions.</span></div></div></div></div>
+        </section>
+
+        <!-- INTELLIGENCE LAB -->
+        <section class="page" data-page="lab" aria-labelledby="labTitle" hidden>
+          <div class="page-heading"><div><div class="section-kicker">04 / LIVE EXPERIMENT</div><h1 id="labTitle">Put the engine <span>to the test.</span></h1><p>Compare any two descriptions. See the match signals, extracted attributes and safety blockers.</p></div><span class="heading-ornament">INPUT A / INPUT B</span></div>
+          <div class="lab-shell"><div class="panel lab-input-panel"><div class="panel-heading"><div><div class="section-kicker">SIDE BY SIDE</div><h3>Describe the materials</h3></div><span class="panel-step">LIVE COMPARISON</span></div><div class="comparison-inputs"><label for="compareA"><span><i class="input-dot blue-dot"></i> MATERIAL A</span><textarea id="compareA" maxlength="400" spellcheck="false">Bearing 6205</textarea></label><div class="vs-badge">VS</div><label for="compareB"><span><i class="input-dot violet-dot"></i> MATERIAL B</span><textarea id="compareB" maxlength="400" spellcheck="false">6205 Deep Groove Ball Bearing</textarea></label></div><div class="example-row"><span>TRY AN EXAMPLE</span><button data-example="equivalent">Same bearing</button><button data-example="different">Different designation</button><button data-example="units">Unit conversion</button><button data-example="grade">Different grade</button></div><div class="lab-action-row"><label class="toggle-row lab-toggle" for="labUseAi"><span><strong>Ask Groq to reason too</strong><small>Descriptions are sent to Groq when enabled and configured.</small></span><input type="checkbox" id="labUseAi"><span class="toggle-track" aria-hidden="true"></span></label><button class="btn btn-primary btn-large" id="compareButton"><svg class="icon"><use href="#i-sparkle"/></svg> Compare materials <svg class="icon"><use href="#i-arrow"/></svg></button></div></div><div id="compareResult" class="lab-result-placeholder"><div class="placeholder-orb"><svg class="icon"><use href="#i-orbit"/></svg></div><strong>Insight is one comparison away.</strong><p>Choose an example or enter your own descriptions, then run the engine.</p></div></div>
+          <div class="lab-bottom-note"><svg class="icon"><use href="#i-shield"/></svg><span>Designed to be conservative: a conflicting specification blocks a match even when the descriptions sound similar. Scores are heuristic signals, not probabilities or proof of interchangeability.</span></div>
+        </section>
+
+        <!-- METHODOLOGY -->
+        <section class="page" data-page="method" aria-labelledby="methodTitle" hidden>
+          <div class="page-heading"><div><div class="section-kicker">THE THINKING BEHIND THE SYSTEM</div><h1 id="methodTitle">Intelligence with <span>guardrails.</span></h1><p>Not just “are these descriptions similar?” — but “do the engineering facts agree?”</p></div><span class="heading-ornament">SIH26099 / SMART AUTOMATION</span></div>
+          <div class="method-hero"><div><div class="eyebrow">THE CODE COSMOS PRINCIPLE</div><h2>Meaning matters.<br><span>Specifications matter more.</span></h2><p>Language is messy. Engineering constraints are not. Our prototype makes both visible so reviewers can act with confidence.</p></div><div class="method-equation"><span>VECTOR</span><b>+</b><span>FUZZY</span><b>+</b><span>ATTRIBUTES</span><b>+</b><span>HUMAN</span><i>&gt;</i><strong>TRUST</strong></div></div>
+          <div class="section-intro"><div><div class="section-kicker">END-TO-END PIPELINE</div><h2>From raw to reliable<span class="period">.</span></h2><p>A practical path from source descriptions to reusable material knowledge.</p></div></div>
+          <div class="method-grid"><div class="method-step"><span>01 / INGEST</span><svg class="icon"><use href="#i-upload"/></svg><h3>Bring records together</h3><p>Import CSV material descriptions with their source and source-system ID.</p></div><div class="method-step"><span>02 / NORMALIZE</span><svg class="icon"><use href="#i-layers"/></svg><h3>Resolve language variation</h3><p>Expand known abbreviations, standardize units and align naming conventions.</p></div><div class="method-step"><span>03 / EXTRACT</span><svg class="icon"><use href="#i-sparkle"/></svg><h3>Surface technical facts</h3><p>Identify explicit dimensions, designations, materials, grades and pressure classes.</p></div><div class="method-step"><span>04 / COMPARE</span><svg class="icon"><use href="#i-merge"/></svg><h3>Build a shortlist</h3><p>Blend synonym-aware local vectors, fuzzy text and attribute agreement. Groq can enrich up to eight pairs per run.</p></div><div class="method-step"><span>05 / PROTECT</span><svg class="icon"><use href="#i-shield"/></svg><h3>Block false equivalence</h3><p>A known spec mismatch prevents a suggestion; missing information is flagged for review.</p></div><div class="method-step"><span>06 / VALIDATE &amp; MAP</span><svg class="icon"><use href="#i-database"/></svg><h3>Keep the expert in charge</h3><p>Approve or reject with notes, link to an imported reference code, export the validated master.</p></div></div>
+          <div class="method-two-col"><div class="panel principles-panel"><div class="section-kicker">BUILT-IN SAFEGUARDS</div><h3>What the AI cannot do.</h3><div class="principle-row"><span>01</span><div><strong>Override a spec conflict</strong><p>6205 is not 6206. M10 × 50 is not M10 × 60. No semantic score can change that.</p></div></div><div class="principle-row"><span>02</span><div><strong>Silently approve a match</strong><p>Fast-track means prioritized review, never an automatic merge.</p></div></div><div class="principle-row"><span>03</span><div><strong>Invent an official CNMC code</strong><p>Demo identifiers are clearly marked. Real mapping needs an authorized reference import.</p></div></div></div><div class="panel principles-panel research-panel"><div class="section-kicker">WHAT MAKES IT DIFFERENT</div><h3>Beyond similarity search.</h3><p>Many entity-resolution tools stop at “these texts look alike.” Material harmonization must account for technical equivalence, accountable review and a destination code.</p><div class="research-contrast"><span>GENERIC SEARCH</span><p>Are these descriptions similar?</p><div class="contrast-arrow"><svg class="icon"><use href="#i-arrow"/></svg></div><span>CODE COSMOS</span><strong>Do the specifications agree, who validated the link, and which trusted code should it use?</strong></div></div></div>
+          <div class="section-intro"><div><div class="section-kicker">WHY IT MATTERS</div><h2>Better data. Wider impact<span class="period">.</span></h2><p>Harmonization creates value beyond a cleaner spreadsheet.</p></div></div>
+          <div class="impact-grid"><div class="impact-card"><span>01 / SOCIAL</span><strong>Give experts their time back.</strong><p>Review targeted candidates instead of scanning descriptions manually.</p></div><div class="impact-card"><span>02 / ECONOMIC</span><strong>See what already exists.</strong><p>Recognize equivalent inventory before creating another material record.</p></div><div class="impact-card"><span>03 / ENVIRONMENTAL</span><strong>Make reuse possible.</strong><p>Clearer material knowledge supports more efficient use of existing resources.</p></div><div class="impact-card"><span>04 / TECHNICAL</span><strong>Build on every decision.</strong><p>Append new batches, retain validated links and grow reusable knowledge.</p></div></div>
+        </section>
+
+        <!-- INTEGRATION -->
+        <section class="page" data-page="settings" aria-labelledby="settingsTitle" hidden>
+          <div class="page-heading"><div><div class="section-kicker">SYSTEM / INTEGRATION</div><h1 id="settingsTitle">Designed to <span>work anywhere.</span></h1><p>One Python service, one same-origin web interface, and an optional Groq intelligence layer.</p></div><span class="heading-ornament">RENDER BLUEPRINT READY</span></div>
+          <div class="settings-grid"><div class="panel connection-panel"><div class="section-kicker">AI INTEGRATION</div><div class="connection-heading"><span class="connection-icon"><svg class="icon"><use href="#i-sparkle"/></svg></span><div><h3>Groq reasoning</h3><span id="settingsAiBadge" class="status-badge">Checking…</span></div></div><p>Groq adds a semantic second opinion to shortlisted pairs and live comparisons. Technical conflicts always win. The local engine continues to work without a key.</p><div class="settings-keyline"><span>MODEL</span><code id="settingsModel">—</code></div><div class="settings-keyline"><span>KEY STATUS</span><strong id="settingsKeyStatus">Checking…</strong></div><div class="settings-keyline"><span>DATA SHARING</span><strong>Only on an enabled run</strong></div><div class="settings-instruction"><strong>To connect Groq</strong><ol><li>Get a key from <span class="mono">console.groq.com/keys</span>.</li><li>Add <code>GROQ_API_KEY</code> in your Render service environment (or local <code>.env</code>).</li><li>Redeploy / restart, then enable Groq on a run.</li></ol><small>Never place an API key in browser code or a public repository.</small></div></div><div class="settings-stack"><div class="panel settings-mini-panel"><span class="settings-mini-icon"><svg class="icon"><use href="#i-database"/></svg></span><div class="section-kicker">DATA &amp; PERSISTENCE</div><h3>A working prototype, not a black box.</h3><p>Records, decisions and the audit trail are stored in SQLite. On Render's free instance, local files are ephemeral across redeploys or instance replacement.</p><div class="settings-note"><svg class="icon"><use href="#i-info"/></svg> For persistent deployment, attach a Render disk on an eligible plan and set <code>DB_PATH</code> to its mount path, or migrate storage to a managed database.</div></div><div class="panel settings-mini-panel"><span class="settings-mini-icon purple"><svg class="icon"><use href="#i-shield"/></svg></span><div class="section-kicker">PROTOTYPE SCOPE</div><h3>Honest by design.</h3><p>Local vectors are synonym-aware sparse representations, not pretrained neural embeddings. Scores are heuristic rankings, not calibrated probabilities. The demo library is illustrative, not an official CNMC taxonomy.</p><button class="icon-text-link" data-nav="method">Read the methodology <svg class="icon"><use href="#i-arrow-up"/></svg></button></div></div></div>
+          <div class="settings-footer"><svg class="icon"><use href="#i-orbit"/></svg><span>CODE COSMOS <i>×</i> SMART INDIA HACKATHON 2026</span><small>PS ID SIH26099 · SMART AUTOMATION · SOFTWARE</small></div>
+        </section>
+      </main>
+      <footer class="site-footer"><span>© 2026 CODE COSMOS</span><span>MADE FOR A BETTER MATERIAL MASTER <span class="footer-sparkle"><svg class="icon"><use href="#i-sparkle"/></svg></span></span><span>SIH26099</span></footer>
+    </div>
+  </div>
+
+  <div class="toast-region" id="toastRegion" role="status" aria-live="polite"></div>
+  <div class="modal-backdrop" id="confirmBackdrop" hidden><div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle"><div class="confirm-icon"><svg class="icon"><use href="#i-alert"/></svg></div><h3 id="confirmTitle">Are you sure?</h3><p id="confirmText"></p><div class="confirm-actions"><button class="btn btn-outline" id="confirmCancel">Cancel</button><button class="btn btn-danger" id="confirmProceed">Continue</button></div></div></div>
+</body>
+</html>
