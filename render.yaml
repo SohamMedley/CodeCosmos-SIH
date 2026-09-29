@@ -1,0 +1,62 @@
+# ---------------------------------------------------------------------------
+# Code Cosmos · Render Blueprint
+# SIH26099 — AI-Driven Standardization & Harmonization of Material Codes
+# ---------------------------------------------------------------------------
+# This prototype is a pure static front-end (HTML + CSS + vanilla ES modules).
+# There is no server, no build step and no Python. Render simply serves the
+# repository as a static site on its global CDN.
+#
+# Deploy:
+#   1. Push this repository to GitHub.
+#   2. In Render: New + → Blueprint → connect the repository.
+#   3. Render reads this file and creates the static site below.
+# ---------------------------------------------------------------------------
+
+services:
+  - type: web
+    name: code-cosmos-material-harmonization
+    runtime: static
+    staticPublishPath: ./
+    buildCommand: ""
+    pullRequestPreviewsEnabled: true
+    autoDeployTrigger: commit
+    routes:
+      - type: rewrite
+        source: /pipeline
+        destination: /index.html
+      - type: rewrite
+        source: /records
+        destination: /index.html
+      - type: rewrite
+        source: /benchmark
+        destination: /index.html
+      - type: rewrite
+        source: /master
+        destination: /index.html
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: SAMEORIGIN
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: Referrer-Policy
+        value: strict-origin-when-cross-origin
+      - path: /*
+        name: Permissions-Policy
+        value: geolocation=(), microphone=(), camera=()
+      # ES modules must never be cached aggressively while iterating.
+      - path: /assets/js/*
+        name: Cache-Control
+        value: public, max-age=300, must-revalidate
+      - path: /assets/css/*
+        name: Cache-Control
+        value: public, max-age=300, must-revalidate
+      # Self-hosted webfonts are immutable.
+      - path: /assets/fonts/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
+      - path: /
+        name: Cache-Control
+        value: public, max-age=0, must-revalidate

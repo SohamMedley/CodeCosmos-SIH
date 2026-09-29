@@ -1,0 +1,14 @@
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# Node (only used by the optional headless smoke test)
+node_modules/
+npm-debug.log*
+
+# Local scratch
+tmp/
+*.local
