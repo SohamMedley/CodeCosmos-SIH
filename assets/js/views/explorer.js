@@ -3,7 +3,7 @@
  * Semantic embedding space, corpus composition, searchable record table.
  */
 
-import { h, clear, qs, fmtInt, debounce, renderPager, downloadFile, toCsv, truncate, toast, openDrawer, kv, fmtDate } from '../components/ui.js';
+import { h, clear, qs, fmtInt, debounce, renderPager, downloadFile, toCsv, truncate, toast, openDrawer, kv, fmtDate, icon } from '../components/ui.js';
 import { scatterChart, barChart, palette } from '../viz/charts.js';
 import { attributeTable, attributePills, bandChip, tokenDiff } from '../components/render.js';
 
@@ -58,7 +58,7 @@ export function initExplorer(store) {
 
   function drawSpace() {
     if (!store.points2d) return;
-    space.dataset.height = '330';
+    space.dataset.height = '400';
     const familyColors = new Map();
     const points = store.records.map((r, i) => {
       const pt = store.points2d[i] || { x: 0, y: 0 };
@@ -82,7 +82,7 @@ export function initExplorer(store) {
       const fam = store.records.find((r) => r.family.id === id);
       legend.append(h('span', {}, h('i', { style: { background: color } }), fam ? fam.family.label : id));
     });
-    legend.append(h('span', {}, h('i', { style: { background: '#fff' } }), 'white ring = accepted into auto-band'));
+    legend.append(h('span', {}, h('i', { style: { background: 'transparent', border: '2px solid var(--violet)', borderRadius: '50%' } }), 'ringed = pair accepted into the auto band'));
   }
 
   function drawComposition() {
@@ -123,7 +123,7 @@ export function initExplorer(store) {
       body.append(tr);
     });
     if (!slice.length) {
-      body.append(h('tr', {}, h('td', { colspan: '7' }, h('div', { class: 'empty-state' }, h('p', { text: 'No records match this filter.' })))));
+      body.append(h('tr', {}, h('td', { colspan: '7' }, h('div', { class: 'empty-state' }, h('div', { class: 'empty-ico' }, icon('search', { size: 28 })), h('p', { text: 'No records match this filter.' })))));
     }
     qs('#recordCount').textContent = `${fmtInt(rows.length)} of ${fmtInt(store.records.length)} rows`;
     renderPager(qs('#recordPager'), { total: rows.length, page, pageSize: PAGE_SIZE, onPage: (p) => { page = p; renderTable(); } });

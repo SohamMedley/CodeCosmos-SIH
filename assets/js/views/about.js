@@ -2,7 +2,7 @@
  * Code Cosmos · Team, approach, architecture and disclosure.
  */
 
-import { h, clear, qs, toast, openDrawer, kv } from '../components/ui.js';
+import { h, clear, qs, toast, openDrawer, kv, icon } from '../components/ui.js';
 
 const TEAM = [
   ['Team Lead', 'Code Cosmos', 'System architecture & matching strategy'],
@@ -24,15 +24,15 @@ const UNIQUE = [
 ];
 
 const ARCH = [
-  ['◈', 'Ingestion & normalization', 'Vendor names, part numbers, filler clauses and unicode noise are removed; shorthand is expanded against a CPSE vocabulary.'],
-  ['⌗', 'Attribute extraction', 'A 25-rule extractor family pulls designation, material, grade, dimension, rating and standard slots out of free text.'],
-  ['⇄', 'Unit standardization', 'A conversion table covering 12 physical quantities maps every numeric attribute to its SI base unit.'],
-  ['◈', 'Semantic embedding', 'tf-idf concept embeddings (64-d) with material-concept ontology expansion; 2-D PCA projection for the visualization.'],
-  ['⋈', 'Hybrid matching', 'Blocked candidate generation, then semantic + fuzzy + attribute scoring with decisive-conflict caps.'],
-  ['⊕', 'Clustering', 'Transitive closure over accepted matches produces one canonical item per engineering concept.'],
-  ['✓', 'Human validation', 'Only the uncertain band reaches a reviewer; approvals and rejections recompute clusters and metrics instantly.'],
-  ['▤', 'CNMC harmonization', 'Deterministic code generation from the validated attribute set: class, type, material, size and variant segments.'],
-  ['✦', 'Reusable knowledge base', 'Validated mappings persist so future runs start already calibrated against expert decisions.']
+  ['database', 'Ingestion & normalization', 'Vendor names, part numbers, filler clauses and unicode noise are removed; shorthand is expanded against a CPSE vocabulary.'],
+  ['tag', 'Attribute extraction', 'A 25-rule extractor family pulls designation, material, grade, dimension, rating and standard slots out of free text.'],
+  ['scale', 'Unit standardization', 'A conversion table covering 12 physical quantities maps every numeric attribute to its SI base unit.'],
+  ['semantic', 'Semantic embedding', 'tf-idf concept embeddings (64-d) with material-concept ontology expansion; 2-D PCA projection for the visualization.'],
+  ['columns', 'Hybrid matching', 'Blocked candidate generation, then semantic + fuzzy + attribute scoring with decisive-conflict caps.'],
+  ['duplicates', 'Clustering', 'Transitive closure over accepted matches produces one canonical item per engineering concept.'],
+  ['checkSquare', 'Human validation', 'Only the uncertain band reaches a reviewer; approvals and rejections recompute clusters and metrics instantly.'],
+  ['archive', 'CNMC harmonization', 'Deterministic code generation from the validated attribute set: class, type, material, size and variant segments.'],
+  ['sparkles', 'Reusable knowledge base', 'Validated mappings persist so future runs start already calibrated against expert decisions.']
 ];
 
 const BENEFITS = [
@@ -66,7 +66,7 @@ export function initAbout(store) {
 
   const arch = qs('#archList');
   clear(arch);
-  ARCH.forEach(([ico, title, body]) => arch.append(h('li', {}, h('i', { text: ico }), h('div', {}, h('b', { text: title }), h('p', { text: body })))));
+  ARCH.forEach(([ico, title, body]) => arch.append(h('li', {}, h('i', {}, icon(ico, { size: 18 })), h('div', {}, h('b', { text: title }), h('p', { text: body })))));
 
   const ben = qs('#benefitGrid');
   clear(ben);

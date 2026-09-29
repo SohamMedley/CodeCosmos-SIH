@@ -7,9 +7,19 @@
  * would: run the pipeline, click through tabs, approve a match,
  * exercise the live console, export files.
  *
- * Run: node smoke.mjs  (from the repo root, with jsdom installed)
+ * Run: npm i -D jsdom && node scripts/smoke.mjs  (from the repo root)
+ * jsdom is a local test-only dependency and is never used by the app itself,
+ * so it is not vendored here. Resolution order below keeps the script portable.
  */
-import { JSDOM, VirtualConsole } from '/home/user/.pwtest/node_modules/jsdom/lib/api.js';
+const loadJsdom = async () => {
+  const candidates = ['jsdom', 'jsdom/lib/api.js'];
+  for (const id of candidates) {
+    try { return await import(id); } catch { /* try the next specifier */ }
+  }
+  console.error('jsdom is not installed. Run:  npm i -D jsdom');
+  process.exit(2);
+};
+const { JSDOM, VirtualConsole } = await loadJsdom();
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -113,7 +123,8 @@ for (let i = 0; i < 90; i++) {
   if (!store.running && store.records.length) break;
 }
 
-assert(window.document.getElementById('boot').classList.contains('gone'), 'boot overlay dismissed');
+assert(!window.document.getElementById('boot'), 'no loading overlay in the DOM');
+assert(q('#sidebar') && q('#tourBtn'), 'app chrome rendered immediately');
 
 console.log('— engine —');
 console.log('records        :', store.records.length);

@@ -7,7 +7,7 @@
  * Arrow keys / buttons step through; Esc ends the tour.
  */
 
-import { h, qs } from './ui.js';
+import { h, qs, icon } from './ui.js';
 
 const STOPS = [
   {
@@ -86,7 +86,7 @@ function paint() {
   const card = h('div', { class: 'tour-card', id: 'tourCard', role: 'dialog', 'aria-live': 'polite' },
     h('div', { class: 'tour-head' },
       h('span', { class: 'tag', text: `Guided tour ${state.index + 1} / ${STOPS.length}` }),
-      h('button', { class: 'icon-btn', title: 'End tour', 'aria-label': 'End tour', onclick: stopTour }, '✕')
+      h('button', { class: 'icon-btn', title: 'End tour', 'aria-label': 'End tour', onclick: stopTour }, icon('close', { size: 15 }))
     ),
     h('h3', { text: stop.title }),
     h('p', { text: stop.body }),

@@ -325,11 +325,20 @@ export function prettyFeature(key) {
   }
 }
 
-/** Power-iteration PCA down to 2-D, for the semantic-space canvas. */
+/**
+ * Power-iteration PCA down to 2-D, for the semantic-space canvas.
+ *
+ * Two details matter here and both were easy to get wrong:
+ *  · deflation must operate on a *working copy*, never on the matrix we
+ *    later project with (otherwise every projection collapses to ~0);
+ *  · scaling uses the 98th percentile rather than the maximum, so one
+ *    outlier can't squash the remaining 259 records into a single dot.
+ */
 export function project2D(dense) {
   const n = dense.length;
   if (!n) return [];
   const dim = dense[0].length;
+
   const mean = new Float64Array(dim);
   for (const v of dense) for (let d = 0; d < dim; d++) mean[d] += v[d] / n;
   const centered = dense.map((v) => {
@@ -337,46 +346,58 @@ export function project2D(dense) {
     for (let d = 0; d < dim; d++) out[d] = v[d] - mean[d];
     return out;
   });
+  const work = centered.map((row) => Float64Array.from(row));
 
   const rng = mulberry32(778899);
-  const pc = [];
+  const components = [];
   for (let comp = 0; comp < 2; comp++) {
     let vec = new Float64Array(dim);
     for (let d = 0; d < dim; d++) vec[d] = rng() * 2 - 1;
-    for (let iter = 0; iter < 40; iter++) {
+    for (let iter = 0; iter < 60; iter++) {
       const next = new Float64Array(dim);
-      for (const row of centered) {
+      for (const row of work) {
         let dot = 0;
         for (let d = 0; d < dim; d++) dot += row[d] * vec[d];
         for (let d = 0; d < dim; d++) next[d] += dot * row[d];
       }
       let norm = 0;
       for (let d = 0; d < dim; d++) norm += next[d] * next[d];
-      norm = Math.sqrt(norm) || 1;
+      norm = Math.sqrt(norm);
+      if (!norm || !Number.isFinite(norm)) { vec = null; break; }
       for (let d = 0; d < dim; d++) next[d] /= norm;
       vec = next;
     }
-    pc.push(vec);
-    // Deflate so the second component is orthogonal to the first.
-    for (const row of centered) {
+    if (!vec) continue;
+    components.push(vec);
+    // Deflate the WORKING copy only.
+    for (const row of work) {
       let dot = 0;
       for (let d = 0; d < dim; d++) dot += row[d] * vec[d];
       for (let d = 0; d < dim; d++) row[d] -= dot * vec[d];
     }
   }
+  if (!components.length) return dense.map(() => ({ x: 0, y: 0 }));
 
-  const pts = centered.map((row) => {
+  // Project the ORIGINAL centered data onto the components.
+  const raw = centered.map((row) => {
     const p = [0, 0];
     for (let c = 0; c < 2; c++) {
+      const comp = components[c] || components[0];
       let dot = 0;
-      for (let d = 0; d < dim; d++) dot += row[d] * pc[c][d];
+      for (let d = 0; d < dim; d++) dot += row[d] * comp[d];
       p[c] = dot;
     }
+    if (components.length === 1) p[1] = 0;
     return { x: p[0], y: p[1] };
   });
 
-  // Normalise into a -1..1 viewport.
-  const xs = pts.map((p) => p.x); const ys = pts.map((p) => p.y);
-  const maxAbs = Math.max(...xs.map(Math.abs), ...ys.map(Math.abs), 1e-6);
-  return pts.map((p) => ({ x: p.x / maxAbs, y: p.y / maxAbs }));
+  // Robust scaling: 98th percentile keeps outliers inside the viewport
+  // without flattening the bulk of the corpus.
+  const magnitudes = raw.map((p) => Math.max(Math.abs(p.x), Math.abs(p.y))).sort((a, b) => a - b);
+  const q = magnitudes[Math.min(magnitudes.length - 1, Math.floor(magnitudes.length * 0.98))] || 1e-9;
+  const scale = q > 1e-12 ? q : (magnitudes[magnitudes.length - 1] || 1);
+  return raw.map((p) => ({
+    x: Math.max(-1.08, Math.min(1.08, p.x / scale)),
+    y: Math.max(-1.08, Math.min(1.08, p.y / scale))
+  }));
 }

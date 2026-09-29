@@ -6,7 +6,7 @@
  * confidence gauges, evidence packets).
  */
 
-import { h, fmtPct, fmtNum, escapeHtml, truncate } from './ui.js';
+import { h, fmtPct, fmtNum, escapeHtml, truncate, icon } from './ui.js';
 
 
 export function confidenceTone(v) {

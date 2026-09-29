@@ -5,7 +5,7 @@
  * Includes a live console for arbitrary CPSE-style descriptions.
  */
 
-import { h, clear, qs, fmtPct, fmtNum, toast } from '../components/ui.js';
+import { h, clear, qs, fmtPct, fmtNum, toast, icon } from '../components/ui.js';
 import { signalBars, tokenDiff, attributePills, bandChip, confidenceTone } from '../components/render.js';
 import { buildRecord } from '../core/matcher.js';
 import { recommend } from '../core/cnmc.js';
@@ -147,7 +147,7 @@ export function initWorkbench(store) {
     clear(reason);
     pair.explanation.forEach((e) => {
       reason.append(h('li', { class: e.type },
-        h('span', { class: 'r-ico', text: { semantic: '◈', fuzzy: '≈', attribute: '⌗', match: '✓', conflict: '!' }[e.type] || '•' }),
+        h('span', { class: 'r-ico' }, icon({ semantic: 'semantic', fuzzy: 'fuzzy', attribute: 'tag', match: 'check', conflict: 'alert' }[e.type] || 'info', { size: 14 })),
         h('div', {}, h('strong', { text: e.label }), h('p', { text: e.detail }))
       ));
     });

@@ -4,7 +4,7 @@
  * calibrated operating point and the reviewer effort removed.
  */
 
-import { h, clear, qs, fmtPct, fmtInt, fmtNum, fmtMs, downloadFile, toast, truncate } from '../components/ui.js';
+import { h, clear, qs, fmtPct, fmtInt, fmtNum, fmtMs, downloadFile, toast, truncate, icon } from '../components/ui.js';
 import { lineChart, histogramChart, groupedBarChart } from '../viz/charts.js';
 import { bandChip } from '../components/render.js';
 
@@ -57,9 +57,9 @@ export function initBenchmark(store) {
       ['Reviewer time removed', fmtPct(m.reviewWorkloadReduction, 1), `${fmtNum(m.estimatedManualHours, 1)} h → ${fmtNum(m.estimatedAssistedHours, 1)} h`, 'ok'],
       ['Engine runtime', fmtMs(m.durationMs), 'in-browser, no server round trips', 'info']
     ];
-    cards.forEach(([kl, kv, kd, tone]) => kpis.append(h('div', { class: 'kpi-card' },
+    cards.forEach(([kl, kv, kd, tone]) => kpis.append(h('div', { class: `kpi-card tone-${tone}` },
       h('span', { class: 'kl', text: kl }),
-      h('span', { class: 'kv', style: { color: `var(--tone-${tone === 'ok' ? 'ok' : 'info'})` }, text: kv }),
+      h('span', { class: 'kv', text: kv }),
       h('span', { class: 'kd', text: kd }))));
 
     drawPR(Number(slider.value));
@@ -114,7 +114,7 @@ export function initBenchmark(store) {
       ['pass', 'Human-in-the-loop coverage', `${fmtInt(m.reviewQueue)} uncertain pairs routed to experts`, 'AI never decides alone in the review band']
     ];
     checksData.forEach(([tone, title, detail, value]) => checks.append(h('li', { class: tone },
-      h('span', { class: 'c-ico', text: tone === 'pass' ? '✓' : '!' }),
+      h('span', { class: 'c-ico' }, icon(tone === 'pass' ? 'check' : 'alert', { size: 13 })),
       h('div', {}, h('strong', { text: title }), h('p', { text: detail })),
       h('span', { class: 'c-val', text: value })
     )));
@@ -172,7 +172,7 @@ export function initBenchmark(store) {
       .sort((a, b) => b.scores.semantic - a.scores.semantic)
       .slice(0, 6);
     if (!near.length) {
-      host.append(h('div', { class: 'empty-state' }, h('p', { text: 'No near-miss pairs in this run.' })));
+      host.append(h('div', { class: 'empty-state' }, h('div', { class: 'empty-ico' }, icon('shield', { size: 28 })), h('p', { text: 'No near-miss pairs in this run.' })));
       return;
     }
     near.forEach((p) => host.append(h('div', { class: 'nm' },

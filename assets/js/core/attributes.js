@@ -23,7 +23,7 @@ export const FAMILIES = [
     keywords: ['bolt', 'nut', 'screw', 'washer', 'stud', 'rivet', 'circlip', 'pin', 'clamp', 'fastener', 'anchor', 'csk', 'hexagonal head']
   },
   {
-    id: 'seals', label: 'Seals, Gaskets & Packing', cnmc: '30-03', icon: '◎',
+    id: 'seals', label: 'Seals, Gaskets & Packing', cnmc: '30-03', icon: 'target',
     keywords: ['seal', 'gasket', 'o-ring', 'oring', 'packing', 'oil seal', 'lip seal', 'ring', 'jointing', 'rope']
   },
   {

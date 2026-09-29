@@ -24,16 +24,16 @@ import { specDensity } from './attributes.js';
 import { project2D } from './embed.js';
 
 export const STAGES = [
-  { id: 'ingest', index: 1, label: 'Data Cleaning & Text Normalization', short: 'Normalize', icon: '⌘', detail: 'Case folding, unicode repair, shorthand expansion, vendor & part-number neutralisation' },
-  { id: 'attributes', index: 2, label: 'Technical Attribute Extraction', short: 'Extract', icon: '⌗', detail: 'Designation, material, grade, dimension, pressure and rating slots filled from unstructured text' },
-  { id: 'units', index: 3, label: 'Unit Standardization', short: 'Standardize', icon: '⇄', detail: 'Every numeric attribute converted to the SI base unit of its quantity so 50 mm = 5 cm = 2 inch' },
-  { id: 'embed', index: 4, label: 'Semantic Embedding Generation', short: 'Embed', icon: '◈', detail: 'Concept-level tf-idf embeddings (Sentence-BERT surrogate) built over the CPSE material vocabulary' },
-  { id: 'match', index: 5, label: 'Hybrid Matching (Semantic + Fuzzy + Technical)', short: 'Match', icon: '⋈', detail: 'Blocked candidate generation followed by tri-signal scoring of every candidate pair' },
-  { id: 'detect', index: 6, label: 'Duplicate & Near-Duplicate Detection', short: 'Detect', icon: '⊕', detail: 'Transitive clustering of accepted matches into one engineering item per material' },
-  { id: 'score', index: 7, label: 'Confidence Scoring & Decision Bands', short: 'Score', icon: '◑', detail: 'Calibrated confidence with critical-attribute conflict caps and an auditable explanation trail' },
-  { id: 'validate', index: 8, label: 'Human Validation Queue', short: 'Validate', icon: '✓', detail: 'High confidence flows through; uncertain cases routed to domain experts with evidence attached' },
-  { id: 'cnmc', index: 9, label: 'CNMC Harmonization & Material Master', short: 'Harmonize', icon: '▤', detail: 'One standard description, one CNMC code, one UOM per validated engineering item' },
-  { id: 'knowledge', index: 10, label: 'Reusable Standardized Knowledge Base', short: 'Knowledge', icon: '✦', detail: 'Validated mappings are retained so future matching starts already calibrated' }
+  { id: 'ingest', index: 1, label: 'Data Cleaning & Text Normalization', short: 'Normalize', icon: 'sliders', detail: 'Case folding, unicode repair, shorthand expansion, vendor & part-number neutralisation' },
+  { id: 'attributes', index: 2, label: 'Technical Attribute Extraction', short: 'Extract', icon: 'tag', detail: 'Designation, material, grade, dimension, pressure and rating slots filled from unstructured text' },
+  { id: 'units', index: 3, label: 'Unit Standardization', short: 'Standardize', icon: 'scale', detail: 'Every numeric attribute converted to the SI base unit of its quantity so 50 mm = 5 cm = 2 inch' },
+  { id: 'embed', index: 4, label: 'Semantic Embedding Generation', short: 'Embed', icon: 'semantic', detail: 'Concept-level tf-idf embeddings (Sentence-BERT surrogate) built over the CPSE material vocabulary' },
+  { id: 'match', index: 5, label: 'Hybrid Matching (Semantic + Fuzzy + Technical)', short: 'Match', icon: 'columns', detail: 'Blocked candidate generation followed by tri-signal scoring of every candidate pair' },
+  { id: 'detect', index: 6, label: 'Duplicate & Near-Duplicate Detection', short: 'Detect', icon: 'duplicates', detail: 'Transitive clustering of accepted matches into one engineering item per material' },
+  { id: 'score', index: 7, label: 'Confidence Scoring & Decision Bands', short: 'Score', icon: 'gauge', detail: 'Calibrated confidence with critical-attribute conflict caps and an auditable explanation trail' },
+  { id: 'validate', index: 8, label: 'Human Validation Queue', short: 'Validate', icon: 'checkSquare', detail: 'High confidence flows through; uncertain cases routed to domain experts with evidence attached' },
+  { id: 'cnmc', index: 9, label: 'CNMC Harmonization & Material Master', short: 'Harmonize', icon: 'archive', detail: 'One standard description, one CNMC code, one UOM per validated engineering item' },
+  { id: 'knowledge', index: 10, label: 'Reusable Standardized Knowledge Base', short: 'Knowledge', icon: 'sparkles', detail: 'Validated mappings are retained so future matching starts already calibrated' }
 ];
 
 const CONFIG_DEFAULTS = {
@@ -49,6 +49,13 @@ const CONFIG_DEFAULTS = {
   useUnits: true,
   includeShowcases: true
 };
+
+/** Monotonic clock that also works where performance.now() is absent. */
+function now() {
+  return (typeof performance !== 'undefined' && typeof performance.now === 'function')
+    ? performance.now()
+    : Date.now();
+}
 
 function tick() {
   return new Promise((resolve) => {
@@ -109,7 +116,7 @@ export class Pipeline {
   /* ---------------------------------------------------------------- */
 
   async run(data) {
-    const t0 = performance.now();
+    const t0 = now();
     this.reset();
     this.status = 'running';
     this.emit('status', this.status);
@@ -127,7 +134,11 @@ export class Pipeline {
     await this.stageScore();
     await this.stageHarmonize();
 
-    this.durationMs = performance.now() - t0;
+    this.durationMs = now() - t0;
+    // Metrics are cached while the run is still in flight (the stage that
+    // needs them fires early), so the cached copy still holds durationMs = 0.
+    // Invalidate it now that the wall-clock total is known.
+    this.metrics = null;
     this.status = 'ready';
     this.setProgress(null, 100, `Pipeline complete · ${this.records.length} records · ${this.durationMs.toFixed(0)} ms`);
     this.log('Pipeline completed', `${this.records.length} records harmonized in ${this.durationMs.toFixed(0)} ms · ${this.pairs.length} candidate pairs`, 'ok');

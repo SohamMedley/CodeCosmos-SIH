@@ -3,7 +3,7 @@
  * Cinematic landing: the problem, the live pipeline, the response map.
  */
 
-import { h, clear, qs, countUp, toast, fmtPct, fmtInt, fmtMs } from '../components/ui.js';
+import { h, clear, qs, countUp, toast, fmtPct, fmtInt, fmtMs, icon } from '../components/ui.js';
 import { STAGES } from '../core/pipeline.js';
 import { SHOWCASES } from '../data/catalog.js';
 
@@ -56,9 +56,10 @@ export function initOverview(store) {
     const list = qs('#heroStageList');
     clear(list);
     STAGES.forEach((s) => {
-      const st = p.stages[s.id] || 0;
+      const st = (p.stages && p.stages[s.id]) || 0;
       const cls = st >= 100 ? 'done' : (p.stage === s.id ? 'active' : '');
-      list.append(h('li', { class: cls }, h('i'), h('span', { text: `${s.index}. ${s.short}` })));
+      const label = p.stage === s.id && st < 100 ? `${s.index}. ${s.short} — ${Math.round(st)}%` : `${s.index}. ${s.short}`;
+      list.append(h('li', { class: cls }, h('i'), h('span', { text: label })));
     });
   }
 
@@ -90,7 +91,7 @@ function renderStatic() {
   GAPS.forEach(([problem, fix]) => {
     gapHost.append(h('li', {},
       h('span', { class: 'gap-problem', text: problem }),
-      h('span', { class: 'gap-arrow', text: '→' }),
+      h('span', { class: 'gap-arrow' }, icon('flow', { size: 17 })),
       h('span', { class: 'gap-fix', text: fix })
     ));
   });
@@ -103,7 +104,7 @@ function renderStatic() {
   clear(loop);
   KNOWLEDGE_LOOP.forEach((node, i) => {
     loop.append(h('div', { class: 'kl-node', style: { animationDelay: `${i * 0.08}s` } }, h('i'), h('span', { text: node })));
-    if (i < KNOWLEDGE_LOOP.length - 1) loop.append(h('span', { class: 'kl-arrow', text: '↻' }));
+    if (i < KNOWLEDGE_LOOP.length - 1) loop.append(h('span', { class: 'kl-arrow' }, icon('chevron', { size: 16 })));
   });
 }
 
@@ -121,10 +122,16 @@ function renderTicker() {
 
 function renderOutcome(snap, store) {
   const m = snap.metrics;
+  for (const id of ['kpiRows', 'kpiPairs', 'kpiDupes', 'kpiReview']) qs(`#${id}`).classList.remove('pending');
   countUp(qs('#kpiRows'), m.records);
   countUp(qs('#kpiPairs'), m.candidatePairs);
   countUp(qs('#kpiDupes'), m.duplicateRecords);
   countUp(qs('#kpiReview'), m.reviewQueue);
+  const list = qs('#heroStageList');
+  if (list) {
+    clear(list);
+    STAGES.forEach((s) => list.append(h('li', { class: 'done' }, h('i'), h('span', { text: `${s.index}. ${s.short}` }))));
+  }
 
   const autoPct = m.candidatePairs ? m.autoCount / m.candidatePairs : 0;
   qs('#sideAuto').textContent = fmtPct(autoPct, 0);

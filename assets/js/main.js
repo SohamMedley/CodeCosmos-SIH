@@ -7,7 +7,7 @@
  */
 
 import { store } from './core/state.js';
-import { qs, qsa, toast, initDrawer, initReveal, fmtInt, fmtMs } from './components/ui.js';
+import { qs, qsa, toast, initDrawer, initReveal, fmtInt, fmtMs, hydrateIcons } from './components/ui.js';
 import { startTour, stopTour, isTourActive } from './components/tour.js';
 import { watchTheme, redrawAll } from './viz/charts.js';
 
@@ -22,35 +22,13 @@ import { initConsole } from './views/console.js';
 import { initAbout } from './views/about.js';
 
 const VIEWS = ['overview', 'pipeline', 'explorer', 'workbench', 'review', 'benchmark', 'master', 'console', 'about'];
-const BOOT_STEPS = [
-  'loading engine modules …',
-  'initializing normalization rules …',
-  'loading unit conversion tables …',
-  'preparing concept ontology …',
-  'generating synthetic CPSE corpus …',
-  'ready'
-];
-
-function boot() {
-  const bar = qs('#bootBar');
-  const msg = qs('#bootMsg');
-  let step = 0;
-  const advance = () => {
-    if (step < BOOT_STEPS.length) {
-      msg.textContent = BOOT_STEPS[step];
-      bar.style.width = `${((step + 1) / BOOT_STEPS.length) * 100}%`;
-      step += 1;
-      setTimeout(advance, 130);
-    }
-  };
-  advance();
-}
-
 function initTheme() {
   let saved = null;
-  try { saved = localStorage.getItem('codecosmos.theme'); } catch (e) { /* ignore */ }
-  const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-  store.setTheme(saved || (prefersLight ? 'light' : 'dark'));
+  try { saved = localStorage.getItem('codecosmos.theme'); } catch (e) { /* storage disabled */ }
+  // Light is the primary aesthetic; dark is used only when the visitor's
+  // system explicitly asks for it (and has not chosen a theme here).
+  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  store.setTheme(saved || (prefersDark ? 'dark' : 'light'));
   qs('#themeBtn').addEventListener('click', () => {
     store.setTheme(store.theme === 'dark' ? 'light' : 'dark');
     setTimeout(() => redrawAll(), 60);
@@ -64,6 +42,7 @@ function initRouter() {
     VIEWS.forEach((v) => { qs(`#view-${v}`).hidden = v !== view; });
     qsa('.nav-link').forEach((a) => a.classList.toggle('active', a.dataset.view === view));
     store.setView(view);
+    hydrateIcons(qs(`#view-${view}`) || document);
     closeSidebar();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setTimeout(() => redrawAll(), 80);
@@ -96,6 +75,7 @@ function initChrome() {
       store.run().catch((err) => toast('bad', 'Pipeline error', String(err.message || err)));
     }
   });
+  hydrateIcons();
   initDrawer();
   initReveal();
   watchTheme(() => redrawAll());
@@ -105,8 +85,9 @@ function initGlobalProgress() {
   const chip = qs('#engineChip');
   store.on('status', (e) => {
     const status = typeof e === 'string' ? e : e.status;
-    qs('#engineLabel').textContent = status === 'running' ? 'Processing' : status === 'ready' ? 'Engine ready' : 'Idle';
-    chip.classList.toggle('ok', status === 'ready');
+    qs('#engineLabel').textContent = status === 'running' ? 'Harmonizing' : status === 'ready' ? 'Engine ready' : 'Idle';
+    chip.classList.toggle('is-ready', status === 'ready');
+    chip.classList.toggle('is-running', status === 'running');
   });
   store.on('progress', (p) => {
     if (p.pct !== undefined) {
@@ -126,6 +107,7 @@ function initGlobalProgress() {
   });
   store.on('complete', (snap) => {
     const m = snap.metrics;
+    qs('#sidebar').classList.add('has-run');
     qs('#navRecords').textContent = fmtInt(m.records);
     qs('#navReview').textContent = fmtInt(m.reviewQueue);
     qs('#navMaster').textContent = fmtInt(m.clusters);
@@ -163,7 +145,6 @@ function initRunButton() {
 }
 
 async function start() {
-  boot();
   initTheme();
   initChrome();
   initGlobalProgress();
@@ -185,11 +166,8 @@ async function start() {
   initConsole(store);
   initAbout(store);
 
-  // Reveal the app as soon as the modules are ready and let the first
-  // harmonization run be watched live in the Overview hero.
-  setTimeout(() => qs('#boot').classList.add('gone'), 520);
-  setTimeout(() => redrawAll(), 700);
-
+  // The interface is usable immediately — the first harmonization run is
+  // watched live in the Overview hero instead of behind a loading screen.
   try {
     await store.run();
     const m = store.metrics;

@@ -3,7 +3,7 @@
  * One validated item per cluster, CNMC-mapped, exportable.
  */
 
-import { h, clear, qs, fmtInt, fmtPct, debounce, renderPager, downloadFile, toCsv, toast, openDrawer, kv, fmtDate } from '../components/ui.js';
+import { h, clear, qs, fmtInt, fmtPct, debounce, renderPager, downloadFile, toCsv, toast, openDrawer, kv, fmtDate, icon } from '../components/ui.js';
 import { barChart, palette } from '../viz/charts.js';
 import { attributePills, attributeTable } from '../components/render.js';
 import { CNMC_CLASSES } from '../core/cnmc.js';
@@ -107,7 +107,7 @@ export function initMaster(store) {
       h('td', {}, h('span', { class: 'mono small', text: fmtPct(m.cohesion, 0) })),
       h('td', {}, h('span', { class: `pill ${m.completeness > 0.6 ? 'k' : 'crit'}`, text: fmtPct(m.completeness, 0) }))
     )));
-    if (!slice.length) body.append(h('tr', {}, h('td', { colspan: '8' }, h('div', { class: 'empty-state' }, h('p', { text: 'No master items match this search.' })))));
+    if (!slice.length) body.append(h('tr', {}, h('td', { colspan: '8' }, h('div', { class: 'empty-state' }, h('div', { class: 'empty-ico' }, icon('search', { size: 28 })), h('p', { text: 'No master items match this search.' })))));
     qs('#masterCount').textContent = `${fmtInt(items.length)} of ${fmtInt(store.masterItems.length)} items`;
     renderPager(qs('#masterPager'), { total: items.length, page, pageSize: PAGE_SIZE, onPage: (p) => { page = p; render(); } });
 

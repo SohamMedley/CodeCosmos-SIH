@@ -5,7 +5,7 @@
  * clusters, the master and the benchmark.
  */
 
-import { h, clear, qs, fmtPct, fmtInt, fmtTime } from '../components/ui.js';
+import { h, clear, qs, fmtPct, fmtInt, fmtTime, icon } from '../components/ui.js';
 import { evidencePacket, bandChip, confidenceTone } from '../components/render.js';
 
 export function initReview(store) {
@@ -38,6 +38,11 @@ export function initReview(store) {
   function render() {
     if (!store.pairs.length) return;
     const queue = store.pipeline.reviewQueue(60);
+    // Land on the first case so the evidence panel is never an empty box.
+    if (!selected && queue.length) selected = queue[0];
+    if (selected && !queue.some((p) => p.key === selected.key) && !store.decisions.has(selected.key)) {
+      selected = queue[0] || null;
+    }
     const decided = [...store.decisions.entries()];
     const stats = qs('#reviewStats');
     clear(stats);
@@ -46,7 +51,7 @@ export function initReview(store) {
     const reviewCount = store.metrics ? store.metrics.reviewQueue : 0;
     const cards = [
       ['Handled by AI (auto band)', fmtInt(autoCount), 'no human touch required'],
-      ['Waiting on your desk', fmtInt(queue.length), 'uncertain matches only'],
+      ['Waiting on your desk', fmtInt(reviewCount), 'uncertain matches only'],
       ['Decisions recorded', fmtInt(decided.length), 'attributed to reviewers'],
       ['Expert decision accuracy', store.metrics && store.metrics.decisionAccuracy !== null ? fmtPct(store.metrics.decisionAccuracy, 0) : '—', 'against hidden ground truth']
     ];
@@ -55,9 +60,11 @@ export function initReview(store) {
 
     const host = qs('#reviewQueue');
     clear(host);
-    qs('#reviewCount').textContent = `${queue.length} open case(s) · ${reviewCount} in band`;
+    qs('#reviewCount').textContent = queue.length < reviewCount
+      ? `Showing ${fmtInt(queue.length)} of ${fmtInt(reviewCount)} open cases — hardest first`
+      : `${fmtInt(queue.length)} open case(s) — hardest first`;
     if (!queue.length) {
-      host.append(h('div', { class: 'empty-state' }, h('div', { class: 'empty-ico', text: '✓' }),
+      host.append(h('div', { class: 'empty-state' }, h('div', { class: 'empty-ico' }, icon('check', { size: 30 })),
         h('p', { text: 'Queue clear. Every uncertain case has been decided — the rest of the corpus flowed through in the auto-accept band.' })));
     }
     queue.forEach((p) => {

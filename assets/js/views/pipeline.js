@@ -4,7 +4,7 @@
  * normalization showcase for the SIH example descriptions.
  */
 
-import { h, clear, qs, fmtInt, fmtTime, fmtPct } from '../components/ui.js';
+import { h, clear, qs, fmtInt, fmtTime, fmtPct, icon } from '../components/ui.js';
 import { STAGES } from '../core/pipeline.js';
 import { barChart } from '../viz/charts.js';
 import { tokenDiff, attributePills } from '../components/render.js';
@@ -55,7 +55,9 @@ function buildTimeline() {
   clear(host);
   STAGES.forEach((s) => {
     host.append(h('article', { class: 'stage', id: `stage-${s.id}`, dataset: { stage: s.id } },
-      h('div', { class: 'stage-idx', text: String(s.index) }),
+      h('div', { class: 'stage-idx', dataset: { icon: s.icon } },
+        icon(s.icon, { size: 17, cls: 'ico stage-ico' }),
+        h('b', { text: String(s.index) })),
       h('div', { class: 'stage-body' },
         h('h3', { text: s.label }),
         h('p', { text: s.detail })
@@ -100,9 +102,9 @@ function renderShowcase(store) {
       ),
       ...records.map((r, i) => h('div', {},
         h('div', { class: 'sc-raw', text: `${r.cpse} · ${r.raw}` }),
-        i < records.length - 1 ? h('div', { class: 'sc-arrow', text: '↓' }) : null
+        i < records.length - 1 ? h('div', { class: 'sc-arrow' }, icon('arrowDown', { size: 15 })) : null
       )),
-      h('div', { class: 'sc-arrow', text: '⇩ harmonized' }),
+      h('div', { class: 'sc-arrow flow-note' }, icon('arrowDown', { size: 15 }), h('span', { text: 'harmonized' })),
       h('div', { class: 'sc-std' }, h('code', { class: 'mono', text: master ? master.code : 'CNMC —' })),
       h('div', { class: 'small muted', text: master ? master.standardDescription : 'standard description generated from validated attributes' }),
       h('div', { class: 'dr-block' }, h('h4', { text: 'extracted attributes' }), attributePills(records[0], 10)),
@@ -112,6 +114,6 @@ function renderShowcase(store) {
     ));
   });
   if (!groups.size) {
-    host.append(h('div', { class: 'empty-state' }, h('div', { class: 'empty-ico', text: '⇄' }), h('p', { text: 'Run the pipeline to see the showcase.' })));
+    host.append(h('div', { class: 'empty-state' }, h('div', { class: 'empty-ico' }, icon('flow', { size: 30 })), h('p', { text: 'Run the pipeline to see the showcase.' })));
   }
 }

@@ -41,7 +41,7 @@ SKF    6206 BEARING
 
 ---
 
-## 2. The full pipeline (all nine stages run live in the browser)
+## 2. The full pipeline (all ten stages run live in the browser)
 
 ```
 CPSE material records (raw, legacy, inconsistent)
@@ -55,8 +55,7 @@ CPSE material records (raw, legacy, inconsistent)
  7  Confidence scoring & decision bands       calibrated score with decisive-conflict caps + explanation trail
  8  Human validation queue                    only the uncertain band reaches an expert (keyboard-first review)
  9  CNMC harmonization                        one standard description, one CNMC code, one UOM per item
-        │
-        └──► Reusable standardized material knowledge base (fed back into future matching)
+10  Reusable knowledge base                   validated mappings are retained and fed back into later runs
 ```
 
 ---
@@ -83,7 +82,7 @@ Everything above is measured at runtime, so the Benchmark tab reports real numbe
 
 | Tab | What to do |
 | --- | --- |
-| **Overview** | Press **Run live harmonization** and watch the nine stages animate. |
+| **Overview** | Press **Run live harmonization** and watch the ten stages animate. |
 | **Pipeline** | Stage-by-stage throughput, audit log and the four-way normalization showcase. |
 | **Data Explorer** | Semantic embedding space (each dot is a record), corpus composition, searchable record table, click any row for its attribute packet. |
 | **Match Workbench** | Pick two records (or load the SIH example set) and see the confidence gauge, the three signal bars, attribute-by-attribute agreement and the reasoning trail. A live console at the bottom analyses **any** description you type. |
@@ -134,7 +133,7 @@ The site needs no environment variables and makes no network calls.
 │   │   ├── base.css           # design tokens, cinematic background, animations
 │   │   └── app.css            # components, tables, charts, full responsiveness
 │   └── js/
-│       ├── main.js            # boot, hash router, global chrome
+│       ├── main.js            # hash router, theme, global chrome
 │       ├── core/              # units, normalize, attributes, fuzzy, embed, matcher, cnmc, pipeline, state
 │       ├── data/catalog.js    # synthetic CPSE corpus + noise engine + ground truth
 │       ├── viz/charts.js      # canvas line / bar / histogram / scatter / grouped-bar charts
@@ -155,16 +154,36 @@ The site needs no environment variables and makes no network calls.
 | Precision / Recall / F1 | **100 % / 87.3 % / 93.2 %** vs hidden ground truth |
 | Cluster purity | **100 %** — no two different engineering items were merged |
 | Duplicate rows collapsed | 200 legacy rows → 60 canonical items |
-| Reviewer effort removed | ≈ 93.9 % (manual ≈ 196 h → assisted ≈ 12 h) |
+| Reviewer effort removed | **92.9 %** (manual ≈ 196 h → assisted ≈ 14 h of review) |
 | Master items produced | 60, each with a CNMC mapping and one UOM |
-| Engine runtime | ≈ 2.5 s, entirely in-browser |
+| Engine runtime | ≈ 9 s for the full ten-stage run, entirely in-browser |
 
 Numbers are recomputed on every run and visible in the **Benchmark** tab; they change with corpus size, seed,
 signal weights and thresholds.
 
 ---
 
-## 8. Prototype disclosure (what is real and what is a stand-in)
+## 8. Interface & design system
+
+* **Light theme by default.** The palette is light-first (`assets/css/base.css` holds both token sets); dark is applied
+  only when the visitor's system asks for it, and the topbar toggle switches instantly and redraws every canvas chart.
+* **No loading screen.** The shell renders straight into a usable state — there is no splash, spinner or artificial
+  delay anywhere in the boot path.
+* **Graded motion.** Entrance, hover, focus and state-change animation is defined once as a keyframe/timing library
+  (`--e-out`, `--e-soft`, `--e-spring`, `--e-inout`) with a stagger helper for lists and card grids. Charts animate
+  their own draw-in and always land on the final frame even if animation frames are throttled.
+* **Reduced motion respected.** `prefers-reduced-motion: reduce` collapses every transition and keyframe to its end
+  state.
+* **Icons are inline SVG.** No icon font, no external request, no unicode-glyph fallback that can render as tofu on a
+  machine with a different font stack.
+* **Responsive from 320 px to 1920 px.** All nine views were swept at twelve widths — 320, 360, 414, 480, 600, 768,
+  900, 1024, 1280, 1440, 1600 and 1920 px — with zero horizontal overflow at any of them.
+* **Accessible by construction.** Skip link, visible focus rings, `aria-live` regions for run status and toasts,
+  keyboard-driven workbench (`A` approve / `R` reject) and a guided tour that also runs on `←`/`→`/`Esc`.
+
+---
+
+## 9. Prototype disclosure (what is real and what is a stand-in)
 
 * This is a **prototype**: the pipeline, matching, scoring, clustering, metrics and exports are real and run live, but
   the production deployment would swap three components:
@@ -181,7 +200,7 @@ signal weights and thresholds.
 
 ---
 
-## 9. Local development
+## 10. Local development
 
 ```bash
 # any static file server works; ES modules require http(s), not file://

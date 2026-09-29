@@ -15,13 +15,12 @@
 </head>
 <body>
 <!-- ─────────────────────────── cinematic background ─────────────────────────── -->
-<div class="bg-stage" aria-hidden="true">
-  <div class="bg-aurora a1"></div>
-  <div class="bg-aurora a2"></div>
-  <div class="bg-aurora a3"></div>
-  <div class="bg-grid"></div>
-  <div class="bg-scan"></div>
-  <div class="bg-vignette"></div>
+<div class="canvas-stage" aria-hidden="true">
+  <div class="aurora a1"></div>
+  <div class="aurora a2"></div>
+  <div class="aurora a3"></div>
+  <div class="grid-veil"></div>
+  <div class="vignette"></div>
 </div>
 
 <a class="skip-link" href="#main">Skip to content</a>
@@ -34,7 +33,7 @@
     </button>
 
     <a class="brand" href="#/overview" aria-label="Code Cosmos home">
-      <span class="brand-mark" aria-hidden="true">
+      <span class="brand-mark orb" aria-hidden="true">
         <svg viewBox="0 0 64 64" class="orbit">
           <defs>
             <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
@@ -56,11 +55,11 @@
     </a>
 
     <div class="topbar-meta">
-      <span class="chip chip-sih" title="Smart India Hackathon 2026 · Smart Automation · Software">
+      <span class="chip chip-brand" title="Smart India Hackathon 2026 · Smart Automation · Software">
         <i class="dot"></i>SIH26099
       </span>
       <span class="chip hide-sm" title="Team Code Cosmos">Team&nbsp;Code&nbsp;Cosmos</span>
-      <span class="chip chip-live hide-md" id="engineChip" title="Pipeline status">
+      <span class="chip chip-live hide-md is-ready" id="engineChip" title="Pipeline status">
         <i class="pulse"></i><span id="engineLabel">Idle</span>
       </span>
     </div>
@@ -76,7 +75,7 @@
       </button>
       <button class="btn btn-primary" id="runBtn" title="Run the full harmonization pipeline">
         <svg viewBox="0 0 24 24" class="ico"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>
-        <span>Run Pipeline</span>
+        <span class="lbl-full">Run Pipeline</span><span class="lbl-mini">Run</span>
       </button>
     </div>
   </header>
@@ -85,16 +84,16 @@
     <aside class="sidebar" id="sidebar">
       <nav class="nav" aria-label="Primary">
         <p class="nav-title">Prototype</p>
-        <a class="nav-link" href="#/overview" data-view="overview"><span class="nv-ico">◈</span><span class="nv-label">Overview</span></a>
-        <a class="nav-link" href="#/pipeline" data-view="pipeline"><span class="nv-ico">⇄</span><span class="nv-label">Pipeline</span><span class="nv-badge" id="navPipeline">10</span></a>
-        <a class="nav-link" href="#/explorer" data-view="explorer"><span class="nv-ico">⌗</span><span class="nv-label">Data Explorer</span><span class="nv-badge" id="navRecords">0</span></a>
-        <a class="nav-link" href="#/workbench" data-view="workbench"><span class="nv-ico">⋈</span><span class="nv-label">Match Workbench</span></a>
-        <a class="nav-link" href="#/review" data-view="review"><span class="nv-ico">✓</span><span class="nv-label">Expert Review</span><span class="nv-badge warn" id="navReview">0</span></a>
+        <a class="nav-link" href="#/overview" data-view="overview"><span class="nv-ico" data-icon="gauge" data-icon-size="15"></span><span class="nv-label">Overview</span></a>
+        <a class="nav-link" href="#/pipeline" data-view="pipeline"><span class="nv-ico" data-icon="flow" data-icon-size="15"></span><span class="nv-label">Pipeline</span><span class="nv-badge" id="navPipeline">10</span></a>
+        <a class="nav-link" href="#/explorer" data-view="explorer"><span class="nv-ico" data-icon="table" data-icon-size="15"></span><span class="nv-label">Data Explorer</span><span class="nv-badge" id="navRecords">0</span></a>
+        <a class="nav-link" href="#/workbench" data-view="workbench"><span class="nv-ico" data-icon="columns" data-icon-size="15"></span><span class="nv-label">Match Workbench</span></a>
+        <a class="nav-link" href="#/review" data-view="review"><span class="nv-ico" data-icon="checkSquare" data-icon-size="15"></span><span class="nv-label">Expert Review</span><span class="nv-badge warn" id="navReview">0</span></a>
         <p class="nav-title">Evidence</p>
-        <a class="nav-link" href="#/benchmark" data-view="benchmark"><span class="nv-ico">◑</span><span class="nv-label">Benchmark</span></a>
-        <a class="nav-link" href="#/master" data-view="master"><span class="nv-ico">▤</span><span class="nv-label">Material Master</span><span class="nv-badge" id="navMaster">0</span></a>
-        <a class="nav-link" href="#/console" data-view="console"><span class="nv-ico">⌘</span><span class="nv-label">Control Console</span></a>
-        <a class="nav-link" href="#/about" data-view="about"><span class="nv-ico">✦</span><span class="nv-label">Team &amp; Approach</span></a>
+        <a class="nav-link" href="#/benchmark" data-view="benchmark"><span class="nv-ico" data-icon="chart" data-icon-size="15"></span><span class="nv-label">Benchmark</span></a>
+        <a class="nav-link" href="#/master" data-view="master"><span class="nv-ico" data-icon="archive" data-icon-size="15"></span><span class="nv-label">Material Master</span><span class="nv-badge" id="navMaster">0</span></a>
+        <a class="nav-link" href="#/console" data-view="console"><span class="nv-ico" data-icon="sliders" data-icon-size="15"></span><span class="nv-label">Control Console</span></a>
+        <a class="nav-link" href="#/about" data-view="about"><span class="nv-ico" data-icon="sparkles" data-icon-size="15"></span><span class="nv-label">Team &amp; Approach</span></a>
       </nav>
       <div class="sidebar-foot">
         <div class="mini-meter">
@@ -151,10 +150,10 @@
                 </div>
               </div>
               <div class="hp-kpis">
-                <div class="kpi"><span class="kpi-label">Legacy rows</span><strong data-count id="kpiRows">0</strong></div>
-                <div class="kpi"><span class="kpi-label">Candidate pairs</span><strong data-count id="kpiPairs">0</strong></div>
-                <div class="kpi"><span class="kpi-label">Dupes collapsed</span><strong data-count id="kpiDupes">0</strong></div>
-                <div class="kpi"><span class="kpi-label">Review queue</span><strong data-count id="kpiReview">0</strong></div>
+                <div class="kpi"><span class="kpi-label">Legacy rows</span><strong class="pending" data-count id="kpiRows">—</strong></div>
+                <div class="kpi"><span class="kpi-label">Candidate pairs</span><strong class="pending" data-count id="kpiPairs">—</strong></div>
+                <div class="kpi"><span class="kpi-label">Dupes collapsed</span><strong class="pending" data-count id="kpiDupes">—</strong></div>
+                <div class="kpi"><span class="kpi-label">Review queue</span><strong class="pending" data-count id="kpiReview">—</strong></div>
               </div>
             </div>
           </div>
@@ -162,11 +161,11 @@
           <div class="ticker" aria-hidden="true"><div class="ticker-track" id="tickerTrack"></div></div>
         </div>
 
-        <div class="grid-3" id="impactGrid">
-          <article class="card lift reveal"><div class="card-ico i1">⏱</div><h3>Faster harmonization</h3><p id="impactSpeed">Run the pipeline to quantify how much manual comparison the engine removes.</p><div class="impact-bar"><i></i></div></article>
-          <article class="card lift reveal"><div class="card-ico i2">⧉</div><h3>Fewer duplicates</h3><p id="impactDupes">Duplicate and near-duplicate detection collapses identical engineering intent into one master item.</p><div class="impact-bar"><i></i></div></article>
-          <article class="card lift reveal"><div class="card-ico i3">✓</div><h3>Higher data accuracy</h3><p id="impactAccuracy">Every recommendation carries a confidence score, an explanation trail and an expert verdict.</p><div class="impact-bar"><i></i></div></article>
-          <article class="card lift reveal"><div class="card-ico i4">▤</div><h3>Standard mapping</h3><p id="impactMap">Validated records become a reusable, searchable material knowledge base with CNMC codes.</p><div class="impact-bar"><i></i></div></article>
+        <div class="grid-3 stagger" id="impactGrid">
+          <article class="card lift reveal"><div class="card-ico i1" data-icon="clock" data-icon-size="20"></div><h3>Faster harmonization</h3><p id="impactSpeed">Run the pipeline to quantify how much manual comparison the engine removes.</p><div class="impact-bar"><i></i></div></article>
+          <article class="card lift reveal"><div class="card-ico i2" data-icon="duplicates" data-icon-size="20"></div><h3>Fewer duplicates</h3><p id="impactDupes">Duplicate and near-duplicate detection collapses identical engineering intent into one master item.</p><div class="impact-bar"><i></i></div></article>
+          <article class="card lift reveal"><div class="card-ico i3" data-icon="shield" data-icon-size="20"></div><h3>Higher data accuracy</h3><p id="impactAccuracy">Every recommendation carries a confidence score, an explanation trail and an expert verdict.</p><div class="impact-bar"><i></i></div></article>
+          <article class="card lift reveal"><div class="card-ico i4" data-icon="map" data-icon-size="20"></div><h3>Standard mapping</h3><p id="impactMap">Validated records become a reusable, searchable material knowledge base with CNMC codes.</p><div class="impact-bar"><i></i></div></article>
         </div>
 
         <div class="split">
@@ -190,7 +189,7 @@
             <a class="btn btn-ghost sm" href="#/master">Open material master</a>
           </header>
           <div class="knowledge-loop" id="knowledgeLoop"></div>
-          <div class="grid-4" id="knowledgeStats"></div>
+          <div class="grid-4 stagger" id="knowledgeStats"></div>
         </section>
       </section>
 
@@ -224,7 +223,7 @@
           <header class="panel-head">
             <div><h2>Normalization &amp; extraction showcase</h2><p class="muted">The same engineering item, written four different ways, resolved to one standardized description.</p></div>
           </header>
-          <div class="showcase-grid" id="showcaseGrid"></div>
+          <div class="showcase-grid stagger" id="showcaseGrid"></div>
         </section>
       </section>
 
@@ -288,7 +287,7 @@
             <label class="field"><span>Record B</span><select id="wbSelectB"></select></label>
           </div>
 
-          <div class="wb-verdict card-flat" id="wbVerdict">
+          <div class="wb-verdict" id="wbVerdict" hidden aria-live="polite">
             <div class="gauge-wrap">
               <svg viewBox="0 0 160 160" class="gauge">
                 <defs>
@@ -359,7 +358,7 @@
           </div>
         </header>
 
-        <div class="grid-4" id="reviewStats"></div>
+        <div class="grid-4 stagger" id="reviewStats"></div>
 
         <div class="review-layout">
           <section class="panel">
@@ -369,7 +368,7 @@
           <section class="panel" id="reviewDetail">
             <header class="panel-head"><div><h2>Evidence packet</h2><p class="muted">Everything the expert needs to decide in one screen.</p></div></header>
             <div id="reviewDetailBody" class="empty-state">
-              <div class="empty-ico">◎</div><p>Select a case from the queue to open its evidence packet.</p>
+              <div class="empty-ico" data-icon="target" data-icon-size="30" data-icon-class="ico thin"></div><p>Select a case from the queue to open its evidence packet.</p>
             </div>
           </section>
         </div>
@@ -387,7 +386,7 @@
           <div class="view-head-actions"><button class="btn btn-ghost" id="exportBench">Export metrics JSON</button></div>
         </header>
 
-        <div class="grid-4" id="benchKpis"></div>
+        <div class="grid-4 stagger" id="benchKpis"></div>
 
         <div class="split">
           <section class="panel">
@@ -421,7 +420,7 @@
 
         <section class="panel">
           <header class="panel-head"><div><h2>Near-miss gallery</h2><p class="muted">Pairs the engine deliberately refused to auto-merge because a decisive specification differs. This is the behaviour that protects the master data.</p></div></header>
-          <div class="nearmiss-grid" id="nearMiss"></div>
+          <div class="nearmiss-grid stagger" id="nearMiss"></div>
         </section>
       </section>
 
@@ -435,7 +434,7 @@
           </div>
         </header>
 
-        <div class="grid-4" id="masterStats"></div>
+        <div class="grid-4 stagger" id="masterStats"></div>
 
         <section class="panel">
           <header class="panel-head">
@@ -599,20 +598,6 @@
 </div>
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
-<div class="boot" id="boot">
-  <div class="boot-inner">
-    <span class="brand-mark lg">
-      <svg viewBox="0 0 64 64">
-        <circle cx="32" cy="32" r="29" fill="none" stroke="url(#brandGrad)" stroke-width="2.5" stroke-dasharray="6 5" class="dash-spin"/>
-        <ellipse cx="32" cy="32" rx="27" ry="11" fill="none" stroke="url(#brandGrad)" stroke-width="1.6" class="ring-a"/>
-        <circle cx="32" cy="32" r="8" fill="url(#brandGrad)" class="core-pulse"/>
-      </svg>
-    </span>
-    <p class="boot-title">Booting Code Cosmos engine</p>
-    <p class="mono small" id="bootMsg">loading modules …</p>
-    <div class="boot-bar"><i id="bootBar"></i></div>
-  </div>
-</div>
 <noscript><div class="noscript">This prototype needs JavaScript enabled — the entire harmonization engine runs in your browser.</div></noscript>
 
 <script type="module" src="./assets/js/main.js"></script>

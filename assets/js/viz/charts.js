@@ -6,9 +6,18 @@
  * driven by real engine output — nothing is faked for the demo.
  */
 
-const PALETTE = ['#22d3ee', '#8b5cf6', '#f472b6', '#34d399', '#fbbf24', '#60a5fa', '#a3e635', '#fb7185', '#c084fc', '#2dd4bf', '#f59e0b', '#38bdf8'];
+const PALETTE = ['#0ea5e9', '#7c3aed', '#db2777', '#059669', '#d97706', '#2563eb', '#65a30d', '#e11d48', '#9333ea', '#0d9488', '#ea580c', '#0891b2'];
+const PALETTE_DARK = ['#22d3ee', '#a855f7', '#f472b6', '#34d399', '#fbbf24', '#60a5fa', '#a3e635', '#fb7185', '#c084fc', '#2dd4bf', '#f59e0b', '#38bdf8'];
 
-export function palette(i) { return PALETTE[i % PALETTE.length]; }
+export function palette(i) {
+  const light = document.documentElement.getAttribute('data-theme') !== 'dark';
+  const set = light ? PALETTE : PALETTE_DARK;
+  return set[i % set.length];
+}
+
+export function reducedMotion() {
+  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
 
 function setup(canvas, cssHeight) {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -25,27 +34,40 @@ function setup(canvas, cssHeight) {
 }
 
 function themeColors() {
-  const light = document.documentElement.getAttribute('data-theme') === 'light';
+  const light = document.documentElement.getAttribute('data-theme') !== 'dark';
   return {
     light,
-    grid: light ? 'rgba(28,46,110,0.12)' : 'rgba(148,173,255,0.12)',
-    axis: light ? 'rgba(28,46,110,0.32)' : 'rgba(148,173,255,0.3)',
-    text: light ? '#5a6791' : '#8593b8',
-    textStrong: light ? '#0d1531' : '#eaf0ff'
+    grid: light ? 'rgba(24,40,100,0.085)' : 'rgba(148,173,255,0.11)',
+    axis: light ? 'rgba(24,40,100,0.22)' : 'rgba(148,173,255,0.26)',
+    text: light ? '#6b7699' : '#8593b8',
+    textStrong: light ? '#0e1734' : '#eaf0ff',
+    font: getComputedStyle(document.body).fontFamily || 'sans-serif',
+    mono: getComputedStyle(document.body).getPropertyValue('--mono').trim() || 'monospace'
   };
 }
 
 function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
 
+/**
+ * Entry animation with a guaranteed landing frame: if requestAnimationFrame
+ * is throttled or unavailable (headless capture, background tab, reduced
+ * motion) the final state is still painted instead of an empty chart.
+ */
 function animate(canvas, duration, draw) {
+  cancelAnimationFrame(canvas._raf);
+  clearTimeout(canvas._rafFallback);
+  if (reducedMotion() || typeof requestAnimationFrame !== 'function') { draw(1); return; }
+  let landed = false;
   const start = performance.now();
+  const finish = () => { if (!landed) { landed = true; draw(1); } };
   const run = (now) => {
     const t = Math.min(1, (now - start) / duration);
     draw(easeOutCubic(t));
     if (t < 1) canvas._raf = requestAnimationFrame(run);
+    else landed = true;
   };
-  cancelAnimationFrame(canvas._raf);
   canvas._raf = requestAnimationFrame(run);
+  canvas._rafFallback = setTimeout(finish, duration + 160);
 }
 
 function attachHover(canvas, hitTest, tooltip) {
@@ -94,7 +116,7 @@ export function lineChart(canvas, opts) {
     const Y = (v) => pad.t + plotH - (v / yMax) * plotH;
 
     ctx.strokeStyle = T.grid; ctx.lineWidth = 1;
-    ctx.fillStyle = T.text; ctx.font = '11px var(--mono, monospace)';
+    ctx.fillStyle = T.text; ctx.font = `11px ${T.mono}`;
     const gridLines = 5;
     for (let i = 0; i <= gridLines; i++) {
       const v = (yMax / gridLines) * i;
@@ -120,7 +142,7 @@ export function lineChart(canvas, opts) {
       ctx.strokeStyle = 'rgba(251,191,36,0.85)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
       ctx.beginPath(); ctx.moveTo(mx, pad.t); ctx.lineTo(mx, pad.t + plotH); ctx.stroke();
       ctx.restore();
-      ctx.fillStyle = '#fbbf24'; ctx.font = '600 11px var(--mono, monospace)'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillStyle = '#fbbf24'; ctx.font = `600 11px ${T.mono}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
       ctx.fillText(opts.marker.label, Math.min(w - 46, Math.max(pad.l + 30, mx)), pad.t + 12);
     }
 
@@ -135,7 +157,7 @@ export function lineChart(canvas, opts) {
       }
       c.strokeStyle = g2.axis;
       c.beginPath(); c.moveTo(pad.l, pad.t); c.lineTo(pad.l, pad.t + plotH); c.lineTo(w - pad.r, pad.t + plotH); c.stroke();
-      c.fillStyle = g2.text; c.font = '11px var(--mono, monospace)';
+      c.fillStyle = g2.text; c.font = `11px ${g2.mono}`;
       for (let i = 0; i <= gridLines; i++) {
         const v = (yMax / gridLines) * i;
         c.textAlign = 'right'; c.textBaseline = 'middle';
@@ -178,9 +200,9 @@ export function lineChart(canvas, opts) {
         c.shadowBlur = 0;
         // last dot
         const last = pts[upto - 1];
-        c.beginPath(); c.arc(X(last.x), Y(last.y), 3.6, 0, Math.PI * 2);
+        c.beginPath(); c.arc(X(last.x), Y(last.y), 4, 0, Math.PI * 2);
         c.fillStyle = s.color; c.fill();
-        c.strokeStyle = '#0b1020'; c.lineWidth = 2; c.stroke();
+        c.strokeStyle = T.light ? '#ffffff' : '#0b1020'; c.lineWidth = 2; c.stroke();
         void si;
       });
     });
@@ -219,46 +241,115 @@ export function barChart(canvas, opts) {
       const barMax = w - labelW - 60;
       items.forEach((it, idx) => {
         const y = 8 + idx * 34;
-        ctx.fillStyle = T.text; ctx.font = '11.5px var(--font, sans-serif)';
+        ctx.fillStyle = T.text; ctx.font = `11.5px ${T.font}`;
         ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
         const label = it.label.length > 30 ? `${it.label.slice(0, 29)}…` : it.label;
         ctx.fillText(label, labelW - 10, y + 11);
         ctx.fillStyle = T.grid;
         roundRect(ctx, labelW, y + 3, barMax, 17, 8); ctx.fill();
         const bw = Math.max(3, (it.value / max) * barMax);
-        const g = ctx.createLinearGradient(labelW, 0, labelW + bw, 0);
         const col = it.color || palette(idx);
-        g.addColorStop(0, col); g.addColorStop(1, `${col}55`);
+        ctx.fillStyle = T.light ? 'rgba(24,40,100,0.055)' : 'rgba(148,173,255,0.08)';
+        roundRect(ctx, labelW, y + 3, barMax, 17, 8); ctx.fill();
+        const g = ctx.createLinearGradient(labelW, 0, labelW + bw, 0);
+        g.addColorStop(0, col); g.addColorStop(1, `${col}88`);
         ctx.fillStyle = g;
         roundRect(ctx, labelW, y + 3, bw, 17, 8); ctx.fill();
         ctx.fillStyle = T.textStrong; ctx.textAlign = 'left';
-        ctx.font = '600 11px var(--mono, monospace)';
+        ctx.font = `600 11px ${T.mono}`;
         ctx.fillText(fmtNum(it.value), labelW + bw + 8, y + 12);
       });
     } else {
-      const pad = { l: 34, r: 10, t: 12, b: 34 };
+      const pad = { l: 40, r: 12, t: 14, b: 38 };
       const plotW = w - pad.l - pad.r; const plotH = h - pad.t - pad.b;
-      const bw = plotW / items.length;
-      ctx.strokeStyle = T.grid;
-      for (let i = 0; i <= 4; i++) {
-        const y = Math.round(pad.t + (plotH / 4) * i) + 0.5;
-        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
-      }
-      items.forEach((it, idx) => {
-        const bh = (it.value / max) * plotH;
-        const x = pad.l + idx * bw + bw * 0.18;
-        const color = it.color || palette(idx);
-        const g = ctx.createLinearGradient(0, pad.t + plotH - bh, 0, pad.t + plotH);
-        g.addColorStop(0, color); g.addColorStop(1, `${color}44`);
-        ctx.fillStyle = g;
-        roundRect(ctx, x, pad.t + plotH - bh, bw * 0.64, bh, 6); ctx.fill();
-        ctx.fillStyle = T.text; ctx.font = '10px var(--mono, monospace)';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-        const lbl = it.label.length > 10 ? `${it.label.slice(0, 9)}…` : it.label;
-        ctx.fillText(lbl, x + bw * 0.32, pad.t + plotH + 7);
+      const bw = plotW / Math.max(1, items.length);
+
+      const frame = (p, gvals) => {
+        const { ctx: c } = setup(canvas, h);
+        const th = themeColors();
+        c.strokeStyle = th.grid; c.lineWidth = 1;
+        c.fillStyle = th.text; c.font = `10.5px ${th.mono}`;
+        for (let i = 0; i <= 4; i++) {
+          const v = (gvals.max / 4) * i;
+          const y = Math.round(pad.t + plotH - (v / gvals.max) * plotH) + 0.5;
+          c.beginPath(); c.moveTo(pad.l, y); c.lineTo(w - pad.r, y); c.stroke();
+          c.textAlign = 'right'; c.textBaseline = 'middle';
+          c.fillText(fmtNum(v), pad.l - 7, y);
+        }
+        c.strokeStyle = th.axis;
+        c.beginPath(); c.moveTo(pad.l, pad.t); c.lineTo(pad.l, pad.t + plotH); c.lineTo(w - pad.r, pad.t + plotH); c.stroke();
+
+        const fill = ring => items.forEach((it, idx) => {
+          const target = (it.value / gvals.max) * plotH;
+          const bh = Math.max(0, target * p);
+          const x = pad.l + idx * bw + bw * 0.18;
+          const bwid = bw * 0.64;
+          const color = it.color || palette(idx);
+          c.fillStyle = th.light ? 'rgba(24,40,100,0.05)' : 'rgba(148,173,255,0.07)';
+          roundRect(c, x, pad.t + plotH - target, bwid, target, 7); c.fill();
+          const g = c.createLinearGradient(0, pad.t + plotH - bh, 0, pad.t + plotH);
+          g.addColorStop(0, color); g.addColorStop(1, `${color}99`);
+          c.fillStyle = g;
+          roundRect(c, x, pad.t + plotH - bh, bwid, bh, 7); c.fill();
+          if (ring) {
+            c.strokeStyle = th.light ? 'rgba(255,255,255,0.9)' : 'rgba(10,14,28,0.75)';
+            c.lineWidth = 1.4; c.stroke();
+          }
+          c.fillStyle = th.text; c.font = `10px ${th.mono}`;
+          c.textAlign = 'center'; c.textBaseline = 'top';
+          const lbl = it.label.length > 11 ? `${it.label.slice(0, 10)}…` : it.label;
+          c.fillText(lbl, x + bwid / 2, pad.t + plotH + 8);
+        });
+
+        const base = () => {
+          c.strokeStyle = th.grid;
+          for (let i = 0; i <= 4; i++) {
+            const y = Math.round(pad.t + plotH - ((gvals.max / 4) * i / gvals.max) * plotH) + 0.5;
+            c.beginPath(); c.moveTo(pad.l, y); c.lineTo(w - pad.r, y); c.stroke();
+          }
+          c.strokeStyle = th.axis;
+          c.beginPath(); c.moveTo(pad.l, pad.t); c.lineTo(pad.l, pad.t + plotH); c.lineTo(w - pad.r, pad.t + plotH); c.stroke();
+        };
+        return { base, fill, th };
+      };
+
+      void frame;
+      const max = Math.max(...items.map((i) => i.value), 1);
+      const ctxRef = setup(canvas, h).ctx;
+      void ctxRef;
+      const state = { max };
+      animate(canvas, 760, (p) => {
+        const { ctx: c } = setup(canvas, h);
+        const th = themeColors();
+        c.strokeStyle = th.grid; c.lineWidth = 1;
+        c.fillStyle = th.text; c.font = `10.5px ${th.mono}`;
+        for (let i = 0; i <= 4; i++) {
+          const v = (state.max / 4) * i;
+          const y = Math.round(pad.t + plotH - (v / state.max) * plotH) + 0.5;
+          c.beginPath(); c.moveTo(pad.l, y); c.lineTo(w - pad.r, y); c.stroke();
+          c.textAlign = 'right'; c.textBaseline = 'middle';
+          c.fillText(fmtNum(v), pad.l - 7, y);
+        }
+        c.strokeStyle = th.axis;
+        c.beginPath(); c.moveTo(pad.l, pad.t); c.lineTo(pad.l, pad.t + plotH); c.lineTo(w - pad.r, pad.t + plotH); c.stroke();
+        items.forEach((it, idx) => {
+          const target = (it.value / state.max) * plotH;
+          const bh = Math.max(0, target * p);
+          const x = pad.l + idx * bw + bw * 0.18;
+          const bwid = bw * 0.64;
+          const color = it.color || palette(idx);
+          c.fillStyle = th.light ? 'rgba(24,40,100,0.05)' : 'rgba(148,173,255,0.07)';
+          roundRect(c, x, pad.t + plotH - target, bwid, target, 7); c.fill();
+          const g = c.createLinearGradient(0, pad.t + plotH - bh, 0, pad.t + plotH);
+          g.addColorStop(0, color); g.addColorStop(1, `${color}99`);
+          c.fillStyle = g;
+          roundRect(c, x, pad.t + plotH - bh, bwid, bh, 7); c.fill();
+          c.fillStyle = th.text; c.font = `10px ${th.mono}`;
+          c.textAlign = 'center'; c.textBaseline = 'top';
+          const lbl = it.label.length > 11 ? `${it.label.slice(0, 10)}…` : it.label;
+          c.fillText(lbl, x + bwid / 2, pad.t + plotH + 8);
+        });
       });
-      ctx.strokeStyle = T.axis;
-      ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + plotH); ctx.stroke();
     }
 
     canvas._items = items;
@@ -315,20 +406,32 @@ export function scatterChart(canvas, opts) {
 
     animate(canvas, 900, (p) => {
       const { ctx: c } = setup(canvas, h);
-      c.strokeStyle = T.grid;
+      const th = themeColors();
+      c.strokeStyle = th.grid;
       for (let i = 0; i <= 4; i++) {
         c.beginPath(); c.moveTo(pad + (plotW / 4) * i, pad); c.lineTo(pad + (plotW / 4) * i, pad + plotH); c.stroke();
         c.beginPath(); c.moveTo(pad, pad + (plotH / 4) * i); c.lineTo(pad + plotW, pad + (plotH / 4) * i); c.stroke();
       }
-      c.strokeStyle = T.axis; c.strokeRect(pad, pad, plotW, plotH);
+      c.fillStyle = th.light ? 'rgba(24,40,100,0.035)' : 'rgba(148,173,255,0.05)';
+      roundRect(c, pad, pad, plotW, plotH, 14); c.fill();
+      c.strokeStyle = th.axis; roundRect(c, pad, pad, plotW, plotH, 14); c.stroke();
+
       const n = Math.ceil(pts.length * p);
       for (let i = 0; i < n; i++) {
         const pt = pts[i];
         const x = sx(pt.x); const y = sy(pt.y);
-        const col = pt.color || '#22d3ee';
-        c.beginPath(); c.arc(x, y, (pt.r || 3.6) * (0.6 + 0.4 * p), 0, Math.PI * 2);
-        c.fillStyle = `${col}c9`; c.fill();
-        if (pt.highlight) { c.strokeStyle = '#fff'; c.lineWidth = 1.6; c.stroke(); }
+        const col = pt.color || palette(0);
+        const r = (pt.r || 3.6) * (0.55 + 0.45 * p);
+        if (pt.highlight) {
+          c.beginPath(); c.arc(x, y, r + 4.5, 0, Math.PI * 2);
+          c.fillStyle = `${col}22`; c.fill();
+        }
+        c.beginPath(); c.arc(x, y, r, 0, Math.PI * 2);
+        c.fillStyle = `${col}${th.light ? 'e6' : 'cc'}`; c.fill();
+        if (pt.highlight) {
+          c.strokeStyle = th.light ? 'rgba(255,255,255,0.95)' : 'rgba(255,255,255,0.85)';
+          c.lineWidth = 1.5; c.stroke();
+        }
       }
       canvas._pts = pts; canvas._proj = { sx, sy };
     });
@@ -365,7 +468,7 @@ export function groupedBarChart(canvas, opts) {
     const plotW = w - pad.l - pad.r; const plotH = h - pad.t - pad.b;
     const max = Math.max(...groups.flatMap((g) => series.map((s) => g[s.key] || 0)), 1);
     ctx.strokeStyle = T.grid;
-    ctx.fillStyle = T.text; ctx.font = '10.5px var(--mono, monospace)';
+    ctx.fillStyle = T.text; ctx.font = `10.5px ${T.mono}`;
     for (let i = 0; i <= 4; i++) {
       const v = (max / 4) * i;
       const y = pad.t + plotH - (v / max) * plotH;
@@ -387,7 +490,7 @@ export function groupedBarChart(canvas, opts) {
         roundRect(ctx, x + 2, pad.t + plotH - bh, Math.max(2, bw - 4), bh, 5); ctx.fill();
       });
       ctx.fillStyle = T.text; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
-      ctx.font = '11px var(--font, sans-serif)';
+      ctx.font = `11px ${T.font}`;
       ctx.fillText(g.label, pad.l + gi * gw + gw / 2, pad.t + plotH + 10);
     });
     ctx.strokeStyle = T.axis;
