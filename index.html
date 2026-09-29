@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Code Cosmos · AI-Driven Standardization &amp; Harmonization of Material Codes Across CPSEs</title>
+<meta name="description" content="SIH26099 — AI-driven, human-in-the-loop material code harmonization prototype for CPSEs. Semantic embeddings, fuzzy matching, technical-attribute extraction, unit standardization, confidence scoring and CNMC mapping. Fully client-side prototype by Team Code Cosmos." />
+<meta name="theme-color" content="#060913" />
+<meta name="author" content="Team Code Cosmos" />
+<meta property="og:title" content="Code Cosmos · Material Code Harmonization Engine" />
+<meta property="og:description" content="Smart India Hackathon 2026 · Problem SIH26099 · Frontend prototype" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='1' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='30' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='9' fill='url(%23g)'/%3E%3Cellipse cx='32' cy='32' rx='28' ry='12' fill='none' stroke='url(%23g)' stroke-width='2' opacity='.7'/%3E%3Cellipse cx='32' cy='32' rx='12' ry='28' fill='none' stroke='url(%23g)' stroke-width='2' opacity='.5'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="./assets/css/base.css" />
+<link rel="stylesheet" href="./assets/css/app.css" />
+</head>
+<body>
+<!-- ─────────────────────────── cinematic background ─────────────────────────── -->
+<div class="bg-stage" aria-hidden="true">
+  <div class="bg-aurora a1"></div>
+  <div class="bg-aurora a2"></div>
+  <div class="bg-aurora a3"></div>
+  <div class="bg-grid"></div>
+  <div class="bg-scan"></div>
+  <div class="bg-vignette"></div>
+</div>
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<!-- ─────────────────────────────── app shell ───────────────────────────────── -->
+<div class="shell">
+  <header class="topbar" id="topbar">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Toggle navigation" aria-expanded="false">
+      <span class="burger"><i></i><i></i><i></i></span>
+    </button>
+
+    <a class="brand" href="#/overview" aria-label="Code Cosmos home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 64 64" class="orbit">
+          <defs>
+            <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#22d3ee"/><stop offset="0.5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#f472b6"/>
+            </linearGradient>
+          </defs>
+          <circle cx="32" cy="32" r="29" fill="none" stroke="url(#brandGrad)" stroke-width="2.5" stroke-dasharray="6 5" class="dash-spin"/>
+          <ellipse cx="32" cy="32" rx="27" ry="11" fill="none" stroke="url(#brandGrad)" stroke-width="1.6" opacity=".75" class="ring-a"/>
+          <ellipse cx="32" cy="32" rx="11" ry="27" fill="none" stroke="url(#brandGrad)" stroke-width="1.6" opacity=".55" class="ring-b"/>
+          <circle cx="32" cy="32" r="8" fill="url(#brandGrad)" class="core-pulse"/>
+          <circle cx="59" cy="32" r="2.6" fill="#22d3ee" class="sat-a"/>
+          <circle cx="32" cy="5" r="2.2" fill="#f472b6" class="sat-b"/>
+        </svg>
+      </span>
+      <span class="brand-text">
+        <strong>Code<span class="grad">Cosmos</span></strong>
+        <small>Material Harmonization Engine</small>
+      </span>
+    </a>
+
+    <div class="topbar-meta">
+      <span class="chip chip-sih" title="Smart India Hackathon 2026 · Smart Automation · Software">
+        <i class="dot"></i>SIH26099
+      </span>
+      <span class="chip hide-sm" title="Team Code Cosmos">Team&nbsp;Code&nbsp;Cosmos</span>
+      <span class="chip chip-live hide-md" id="engineChip" title="Pipeline status">
+        <i class="pulse"></i><span id="engineLabel">Idle</span>
+      </span>
+    </div>
+
+    <div class="topbar-actions">
+      <button class="icon-btn" id="themeBtn" title="Toggle light / dark" aria-label="Toggle theme">
+        <svg viewBox="0 0 24 24" class="ico-sun"><circle cx="12" cy="12" r="4.2"/><g stroke-linecap="round"><path d="M12 2.4v2.2M12 19.4v2.2M2.4 12h2.2M19.4 12h2.2M5.2 5.2l1.6 1.6M17.2 17.2l1.6 1.6M18.8 5.2l-1.6 1.6M6.8 17.2l-1.6 1.6"/></g></svg>
+        <svg viewBox="0 0 24 24" class="ico-moon"><path d="M20 14.4A8.6 8.6 0 1 1 9.6 4a6.9 6.9 0 0 0 10.4 10.4z"/></svg>
+      </button>
+      <button class="btn btn-ghost hide-sm" id="tourBtn" title="Guided walkthrough for evaluators">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M12 3.5a8.5 8.5 0 1 1 0 17 8.5 8.5 0 0 1 0-17z" fill="none"/><path d="M12 8v4l3 2"/></svg>
+        <span>Tour</span>
+      </button>
+      <button class="btn btn-primary" id="runBtn" title="Run the full harmonization pipeline">
+        <svg viewBox="0 0 24 24" class="ico"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg>
+        <span>Run Pipeline</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="body">
+    <aside class="sidebar" id="sidebar">
+      <nav class="nav" aria-label="Primary">
+        <p class="nav-title">Prototype</p>
+        <a class="nav-link" href="#/overview" data-view="overview"><span class="nv-ico">◈</span><span class="nv-label">Overview</span></a>
+        <a class="nav-link" href="#/pipeline" data-view="pipeline"><span class="nv-ico">⇄</span><span class="nv-label">Pipeline</span><span class="nv-badge" id="navPipeline">10</span></a>
+        <a class="nav-link" href="#/explorer" data-view="explorer"><span class="nv-ico">⌗</span><span class="nv-label">Data Explorer</span><span class="nv-badge" id="navRecords">0</span></a>
+        <a class="nav-link" href="#/workbench" data-view="workbench"><span class="nv-ico">⋈</span><span class="nv-label">Match Workbench</span></a>
+        <a class="nav-link" href="#/review" data-view="review"><span class="nv-ico">✓</span><span class="nv-label">Expert Review</span><span class="nv-badge warn" id="navReview">0</span></a>
+        <p class="nav-title">Evidence</p>
+        <a class="nav-link" href="#/benchmark" data-view="benchmark"><span class="nv-ico">◑</span><span class="nv-label">Benchmark</span></a>
+        <a class="nav-link" href="#/master" data-view="master"><span class="nv-ico">▤</span><span class="nv-label">Material Master</span><span class="nv-badge" id="navMaster">0</span></a>
+        <a class="nav-link" href="#/console" data-view="console"><span class="nv-ico">⌘</span><span class="nv-label">Control Console</span></a>
+        <a class="nav-link" href="#/about" data-view="about"><span class="nv-ico">✦</span><span class="nv-label">Team &amp; Approach</span></a>
+      </nav>
+      <div class="sidebar-foot">
+        <div class="mini-meter">
+          <div class="mm-row"><span>Auto-accept band</span><strong id="sideAuto">—</strong></div>
+          <div class="mm-bar"><i id="sideAutoBar" style="width:0%"></i></div>
+        </div>
+        <p class="fine">100% client-side prototype · no backend</p>
+      </div>
+    </aside>
+
+    <main class="main" id="main">
+      <!-- ══════════════════════════════ OVERVIEW ══════════════════════════════ -->
+      <section class="view" id="view-overview" hidden>
+        <div class="hero">
+          <div class="hero-grid">
+            <div class="hero-copy">
+              <div class="eyebrow"><span class="tag">Problem Statement SIH26099</span><span class="tag ghost">Smart Automation · Software</span></div>
+              <h1>AI-Driven Standardization &amp; Harmonization of <span class="grad-text">Material Codes</span> Across CPSEs</h1>
+              <p class="lede">
+                Every CPSE writes the same engineering item differently —
+                <span class="mono">Bearing 6205</span>, <span class="mono">6205 Deep Groove Ball Bearing</span>,
+                <span class="mono">BALL BEARING, 6205</span>, <span class="mono">SKF 6205 BEARING</span>.
+                This engine understands the <em>engineering meaning</em> behind the words, aligns units, scores its own
+                confidence and routes only the uncertain cases to a human expert — ending with one validated
+                material master and a CNMC code.
+              </p>
+              <div class="hero-cta">
+                <button class="btn btn-primary lg" id="heroRun"><svg viewBox="0 0 24 24" class="ico"><path d="M8 5.5v13l11-6.5z" fill="currentColor" stroke="none"/></svg><span>Run live harmonization</span></button>
+                <a class="btn btn-ghost lg" href="#/workbench">Open match workbench</a>
+              </div>
+              <div class="hero-ticks">
+                <span><b>9</b> engineering item classes</span>
+                <span><b>3</b> fused matching signals</span>
+                <span><b>0</b> backend dependencies</span>
+              </div>
+            </div>
+
+            <div class="hero-panel">
+              <div class="hp-head">
+                <span class="hp-title">Live pipeline</span>
+                <span class="chip chip-live"><i class="pulse"></i><span id="heroStatus">idle</span></span>
+              </div>
+              <div class="hp-stage">
+                <div class="ring-wrap">
+                  <svg viewBox="0 0 120 120" class="prog-ring">
+                    <circle class="pr-track" cx="60" cy="60" r="52"/>
+                    <circle class="pr-fill" cx="60" cy="60" r="52" id="heroRing"/>
+                  </svg>
+                  <div class="ring-label"><strong id="heroPct">0%</strong><small id="heroStageName">ready</small></div>
+                </div>
+                <div class="hp-stage-detail">
+                  <p class="mono small" id="heroStageDetail">Awaiting dataset …</p>
+                  <ul class="stage-mini" id="heroStageList"></ul>
+                </div>
+              </div>
+              <div class="hp-kpis">
+                <div class="kpi"><span class="kpi-label">Legacy rows</span><strong data-count id="kpiRows">0</strong></div>
+                <div class="kpi"><span class="kpi-label">Candidate pairs</span><strong data-count id="kpiPairs">0</strong></div>
+                <div class="kpi"><span class="kpi-label">Dupes collapsed</span><strong data-count id="kpiDupes">0</strong></div>
+                <div class="kpi"><span class="kpi-label">Review queue</span><strong data-count id="kpiReview">0</strong></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="ticker" aria-hidden="true"><div class="ticker-track" id="tickerTrack"></div></div>
+        </div>
+
+        <div class="grid-3" id="impactGrid">
+          <article class="card lift reveal"><div class="card-ico i1">⏱</div><h3>Faster harmonization</h3><p id="impactSpeed">Run the pipeline to quantify how much manual comparison the engine removes.</p><div class="impact-bar"><i></i></div></article>
+          <article class="card lift reveal"><div class="card-ico i2">⧉</div><h3>Fewer duplicates</h3><p id="impactDupes">Duplicate and near-duplicate detection collapses identical engineering intent into one master item.</p><div class="impact-bar"><i></i></div></article>
+          <article class="card lift reveal"><div class="card-ico i3">✓</div><h3>Higher data accuracy</h3><p id="impactAccuracy">Every recommendation carries a confidence score, an explanation trail and an expert verdict.</p><div class="impact-bar"><i></i></div></article>
+          <article class="card lift reveal"><div class="card-ico i4">▤</div><h3>Standard mapping</h3><p id="impactMap">Validated records become a reusable, searchable material knowledge base with CNMC codes.</p><div class="impact-bar"><i></i></div></article>
+        </div>
+
+        <div class="split">
+          <section class="panel reveal">
+            <header class="panel-head">
+              <div><h2>The gap → the response</h2><p class="muted">Each CPSE data-quality problem is answered by a specific AI capability — not AI for its own sake.</p></div>
+            </header>
+            <ul class="gap-list" id="gapList"></ul>
+          </section>
+          <section class="panel reveal">
+            <header class="panel-head">
+              <div><h2>End-to-end harmonization flow</h2><p class="muted">Raw material data → validated master. Watch a record travel this path in the Workbench.</p></div>
+            </header>
+            <ol class="flow" id="flowList"></ol>
+          </section>
+        </div>
+
+        <section class="panel reveal" id="knowledgePanel">
+          <header class="panel-head">
+            <div><h2>Reusable standardized material knowledge</h2><p class="muted">After validation, harmonized information feeds future matching instead of being thrown away.</p></div>
+            <a class="btn btn-ghost sm" href="#/master">Open material master</a>
+          </header>
+          <div class="knowledge-loop" id="knowledgeLoop"></div>
+          <div class="grid-4" id="knowledgeStats"></div>
+        </section>
+      </section>
+
+      <!-- ══════════════════════════════ PIPELINE ══════════════════════════════ -->
+      <section class="view" id="view-pipeline" hidden>
+        <header class="view-head">
+          <div>
+            <h1>Harmonization Pipeline</h1>
+            <p class="lede-sm">Ten stages, executed live in your browser. Each stage reports real numbers from the record set you generated.</p>
+          </div>
+          <div class="view-head-actions">
+            <button class="btn btn-ghost" id="pipelineRun">Re-run pipeline</button>
+          </div>
+        </header>
+
+        <div class="split narrow-wide">
+          <div class="stages" id="stageTimeline"></div>
+          <div class="stack">
+            <section class="panel">
+              <header class="panel-head"><div><h2>Throughput</h2><p class="muted">Stage completion percentage, captured while the engine runs.</p></div></header>
+              <div class="chart-box"><canvas id="chartStages" height="260" role="img" aria-label="Stage completion chart"></canvas></div>
+            </section>
+            <section class="panel">
+              <header class="panel-head"><div><h2>Pipeline audit log</h2><p class="muted">Every stage writes an immutable entry — this is the trace shown to auditors.</p></div></header>
+              <ul class="audit" id="auditLog"></ul>
+            </section>
+          </div>
+        </div>
+
+        <section class="panel">
+          <header class="panel-head">
+            <div><h2>Normalization &amp; extraction showcase</h2><p class="muted">The same engineering item, written four different ways, resolved to one standardized description.</p></div>
+          </header>
+          <div class="showcase-grid" id="showcaseGrid"></div>
+        </section>
+      </section>
+
+      <!-- ══════════════════════════════ EXPLORER ══════════════════════════════ -->
+      <section class="view" id="view-explorer" hidden>
+        <header class="view-head">
+          <div><h1>Data Explorer</h1><p class="lede-sm">The synthetic CPSE extract, the semantic embedding space and per-record attribute extraction.</p></div>
+          <div class="view-head-actions">
+            <label class="field inline"><span>Row set</span><select id="explorerCpse"></select></label>
+            <button class="btn btn-ghost" id="exportRows">Export CSV</button>
+          </div>
+        </header>
+
+        <div class="split narrow-wide">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Semantic embedding space</h2><p class="muted">Each dot is a material description projected to 2-D. Colour = engineering family. Tight clusters = the engine already sees them as the same item.</p></div></header>
+            <div class="chart-box tall"><canvas id="chartSpace" role="img" aria-label="Semantic space scatter plot"></canvas></div>
+            <div class="legend" id="spaceLegend"></div>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><div><h2>Corpus composition</h2><p class="muted">Where the legacy rows come from.</p></div></header>
+            <div class="chart-box"><canvas id="chartCpse" height="220" role="img" aria-label="Records per CPSE"></canvas></div>
+            <div class="chart-box"><canvas id="chartFamilies" height="240" role="img" aria-label="Records per engineering family"></canvas></div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <header class="panel-head">
+            <div><h2>Material record table</h2><p class="muted">Search by description, legacy code or CPSE. Click a row to inspect extracted attributes.</p></div>
+            <div class="table-tools">
+              <input type="search" id="recordSearch" placeholder="Search 6205, SS 304, gate valve …" aria-label="Search records" />
+              <span class="muted small" id="recordCount"></span>
+            </div>
+          </header>
+          <div class="table-scroll">
+            <table class="tbl" id="recordTable">
+              <thead><tr><th>Legacy code</th><th>Description as stored</th><th>CPSE</th><th>Family</th><th>Attributes</th><th>Master item</th><th>Band</th></tr></thead>
+              <tbody id="recordBody"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="recordPager"></div>
+        </section>
+      </section>
+
+      <!-- ══════════════════════════════ WORKBENCH ═════════════════════════════ -->
+      <section class="view" id="view-workbench" hidden>
+        <header class="view-head">
+          <div><h1>Match Workbench</h1><p class="lede-sm">Pick any two material records. The engine explains, point by point, why they are equivalent — or why they are not.</p></div>
+          <div class="view-head-actions">
+            <button class="btn btn-ghost" id="wbShowcase">Load SIH example set</button>
+            <button class="btn btn-ghost" id="wbRandom">Random pair</button>
+          </div>
+        </header>
+
+        <div class="wb">
+          <div class="wb-pick">
+            <label class="field"><span>Record A</span><select id="wbSelectA"></select></label>
+            <button class="icon-btn swap" id="wbSwap" title="Swap A and B" aria-label="Swap selection">
+              <svg viewBox="0 0 24 24"><path d="M7 7h11l-3-3M17 17H6l3 3" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <label class="field"><span>Record B</span><select id="wbSelectB"></select></label>
+          </div>
+
+          <div class="wb-verdict card-flat" id="wbVerdict">
+            <div class="gauge-wrap">
+              <svg viewBox="0 0 160 160" class="gauge">
+                <defs>
+                  <linearGradient id="gaugeGrad" x1="0" y1="1" x2="1" y2="0">
+                    <stop offset="0" stop-color="#f87171"/><stop offset="0.45" stop-color="#fbbf24"/><stop offset="1" stop-color="#34d399"/>
+                  </linearGradient>
+                </defs>
+                <circle class="g-track" cx="80" cy="80" r="66"/>
+                <circle class="g-fill" cx="80" cy="80" r="66" id="wbGauge"/>
+              </svg>
+              <div class="gauge-label"><strong id="wbConfidence">—</strong><small id="wbBand">awaiting selection</small></div>
+            </div>
+            <div class="signal-bars" id="wbSignals"></div>
+            <div class="verdict-actions">
+              <button class="btn btn-ok" id="wbAccept">Approve match</button>
+              <button class="btn btn-bad" id="wbReject">Reject match</button>
+              <button class="btn btn-ghost" id="wbReset">Reset decision</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="split">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Record A</h2></div><span class="chip" id="wbChipA"></span></header>
+            <div id="wbPaneA"></div>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><div><h2>Record B</h2></div><span class="chip" id="wbChipB"></span></header>
+            <div id="wbPaneB"></div>
+          </section>
+        </div>
+
+        <div class="split">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Attribute-by-attribute agreement</h2><p class="muted">Values are compared after unit standardization, so 50&nbsp;mm, 5&nbsp;cm and 1.97&nbsp;in are the same number.</p></div></header>
+            <div class="table-scroll"><table class="tbl compact" id="attrTable"><thead><tr><th>Attribute</th><th>A (as written)</th><th>B (as written)</th><th>Standardized</th><th>Verdict</th></tr></thead><tbody id="attrBody"></tbody></table></div>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><div><h2>Why this score</h2><p class="muted">Auditable reasoning trail for the confidence value.</p></div></header>
+            <ul class="reason" id="wbReason"></ul>
+            <div class="why-shared" id="wbShared"></div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <header class="panel-head"><div><h2>Standardized output</h2><p class="muted">What the harmonized material master receives for this cluster.</p></div></header>
+          <div class="out-grid" id="wbOutput"></div>
+        </section>
+
+        <section class="panel playground">
+          <header class="panel-head"><div><h2>Live console</h2><p class="muted">Type any material description exactly as a CPSE store might write it. The engine normalizes it, extracts attributes, standardizes units and finds the closest validated master item.</p></div></header>
+          <div class="pg-row">
+            <input type="text" id="pgInput" value="2 INCH GATE VALVE, CI BODY, FLANGED, PN 16, AS PER IS 14846" aria-label="Material description to test" />
+            <button class="btn btn-primary" id="pgRun">Analyse</button>
+          </div>
+          <div class="pg-demo" id="pgDemo"></div>
+          <div class="pg-out" id="pgOut"></div>
+        </section>
+      </section>
+
+      <!-- ══════════════════════════════ REVIEW ════════════════════════════════ -->
+      <section class="view" id="view-review" hidden>
+        <header class="view-head">
+          <div><h1>Expert Review Queue</h1><p class="lede-sm">High-confidence matches already flowed through. These are the uncertain ones — the only rows a domain expert still has to look at.</p></div>
+          <div class="view-head-actions">
+            <button class="btn btn-ghost" id="reviewAll">Approve all in queue</button>
+            <button class="btn btn-ghost" id="reviewAuto">Approve top 10</button>
+          </div>
+        </header>
+
+        <div class="grid-4" id="reviewStats"></div>
+
+        <div class="review-layout">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Queue</h2><p class="muted">Sorted by distance from the decision boundary — hardest cases first.</p></div><span class="muted small" id="reviewCount"></span></header>
+            <ul class="queue" id="reviewQueue"></ul>
+          </section>
+          <section class="panel" id="reviewDetail">
+            <header class="panel-head"><div><h2>Evidence packet</h2><p class="muted">Everything the expert needs to decide in one screen.</p></div></header>
+            <div id="reviewDetailBody" class="empty-state">
+              <div class="empty-ico">◎</div><p>Select a case from the queue to open its evidence packet.</p>
+            </div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <header class="panel-head"><div><h2>Decision log</h2><p class="muted">Human-in-the-loop actions, attributed and timestamped.</p></div></header>
+          <ul class="audit" id="decisionLog"></ul>
+        </section>
+      </section>
+
+      <!-- ══════════════════════════════ BENCHMARK ═════════════════════════════ -->
+      <section class="view" id="view-benchmark" hidden>
+        <header class="view-head">
+          <div><h1>Benchmark &amp; Impact</h1><p class="lede-sm">Ground truth is known for this synthetic corpus, so every number below is measured by the engine at runtime — not estimated.</p></div>
+          <div class="view-head-actions"><button class="btn btn-ghost" id="exportBench">Export metrics JSON</button></div>
+        </header>
+
+        <div class="grid-4" id="benchKpis"></div>
+
+        <div class="split">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Precision / Recall / F1 vs threshold</h2><p class="muted">Drag the calibration line to see how the operating point moves. The marker shows the configured auto-accept threshold.</p></div></header>
+            <div class="chart-box tall"><canvas id="chartPR" role="img" aria-label="Precision recall curve"></canvas></div>
+            <div class="slider-row">
+              <label class="field range"><span>Auto-accept threshold <b id="thVal">0.85</b></span><input type="range" id="thSlider" min="0.5" max="0.98" step="0.01" value="0.85" /></label>
+            </div>
+            <div class="grid-3 tight" id="thReadout"></div>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><div><h2>Confidence distribution</h2><p class="muted">How confident the engine is across all candidate pairs.</p></div></header>
+            <div class="chart-box"><canvas id="chartConf" height="240" role="img" aria-label="Confidence histogram"></canvas></div>
+            <header class="panel-head mt"><div><h3>Decision bands</h3></div></header>
+            <ul class="band-list" id="bandList"></ul>
+            <header class="panel-head mt"><div><h3>Signal contribution</h3></div></header>
+            <div class="signal-grid" id="benchSignals"></div>
+          </section>
+        </div>
+
+        <div class="split">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Manual effort removed</h2><p class="muted">Estimated reviewer minutes for exhaustive manual comparison versus assisted review at the configured operating point.</p></div></header>
+            <div class="chart-box"><canvas id="chartEffort" height="220" role="img" aria-label="Effort comparison"></canvas></div>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><div><h2>Accuracy &amp; integrity checks</h2><p class="muted">Cluster purity is the critical safety metric: a pure cluster means no two different engineering items were silently merged.</p></div></header>
+            <ul class="check-list" id="benchChecks"></ul>
+          </section>
+        </div>
+
+        <section class="panel">
+          <header class="panel-head"><div><h2>Near-miss gallery</h2><p class="muted">Pairs the engine deliberately refused to auto-merge because a decisive specification differs. This is the behaviour that protects the master data.</p></div></header>
+          <div class="nearmiss-grid" id="nearMiss"></div>
+        </section>
+      </section>
+
+      <!-- ══════════════════════════════ MASTER ════════════════════════════════ -->
+      <section class="view" id="view-master" hidden>
+        <header class="view-head">
+          <div><h1>Standardized Material Master</h1><p class="lede-sm">One validated engineering item per cluster, with a generated CNMC mapping and a single standard description.</p></div>
+          <div class="view-head-actions">
+            <button class="btn btn-ghost" id="exportMasterCsv">Export CSV</button>
+            <button class="btn btn-ghost" id="exportMasterJson">Export JSON</button>
+          </div>
+        </header>
+
+        <div class="grid-4" id="masterStats"></div>
+
+        <section class="panel">
+          <header class="panel-head">
+            <div><h2>Validated items</h2><p class="muted">Search the master by CNMC code, description or class. Click a row to expand its source records.</p></div>
+            <div class="table-tools"><input type="search" id="masterSearch" placeholder="Search CNMC 30-01, gate valve …" aria-label="Search master" /><span class="muted small" id="masterCount"></span></div>
+          </header>
+          <div class="table-scroll">
+            <table class="tbl" id="masterTable">
+              <thead><tr><th>CNMC code</th><th>Standard description</th><th>Class</th><th>UOM</th><th>Merged from</th><th>CPSEs</th><th>Cohesion</th><th>Completeness</th></tr></thead>
+              <tbody id="masterBody"></tbody>
+            </table>
+          </div>
+          <div class="pager" id="masterPager"></div>
+        </section>
+
+        <section class="panel">
+          <header class="panel-head"><div><h2>CNMC class coverage</h2><p class="muted">How the harmonized master distributes across CNMC-style classes.</p></div></header>
+          <div class="chart-box"><canvas id="chartCnmc" height="280" role="img" aria-label="CNMC class coverage chart"></canvas></div>
+        </section>
+      </section>
+
+      <!-- ══════════════════════════════ CONSOLE ═══════════════════════════════ -->
+      <section class="view" id="view-console" hidden>
+        <header class="view-head">
+          <div><h1>Control Console</h1><p class="lede-sm">Everything that governs a run: corpus generation, signal weights, decision thresholds and the raw normalization rules.</p></div>
+          <div class="view-head-actions"><button class="btn btn-primary" id="consoleRun">Apply &amp; run</button></div>
+        </header>
+
+        <div class="split">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Corpus</h2><p class="muted">Legacy records are generated from engineering concepts with realistic CPSE noise. Ground truth stays hidden from the matcher.</p></div></header>
+            <label class="field range"><span>Records <b id="sizeVal">260</b></span><input type="range" id="sizeRange" min="60" max="600" step="20" value="260" /></label>
+            <label class="field"><span>Generation seed</span><input type="number" id="seedInput" value="20260129" /></label>
+            <label class="tgl"><input type="checkbox" id="tglShowcase" checked /><span class="sl"></span><span class="tl">Include the SIH example descriptions verbatim<em>Bearing 6205, 6205 Deep Groove Ball Bearing, SKF 6205 BEARING …</em></span></label>
+            <div class="btn-row"><button class="btn btn-ghost" id="regenSeed">New random seed</button><button class="btn btn-ghost" id="downloadCorpus">Download corpus CSV</button></div>
+          </section>
+
+          <section class="panel">
+            <header class="panel-head"><div><h2>Signal fusion</h2><p class="muted">Weights combine semantic similarity, fuzzy text similarity and technical-attribute agreement into one confidence value.</p></div></header>
+            <label class="field range"><span>Semantic embeddings <b id="wSemVal">0.32</b></span><input type="range" id="wSem" min="0" max="1" step="0.02" value="0.32" /></label>
+            <label class="field range"><span>Fuzzy text matching <b id="wFzVal">0.24</b></span><input type="range" id="wFz" min="0" max="1" step="0.02" value="0.24" /></label>
+            <label class="field range"><span>Technical attributes <b id="wAtVal">0.44</b></span><input type="range" id="wAt" min="0" max="1" step="0.02" value="0.44" /></label>
+            <div class="weight-bar"><i id="wbSemBar"></i><i id="wbFzBar"></i><i id="wbAtBar"></i></div>
+            <label class="tgl"><input type="checkbox" id="tglFuzzy" checked /><span class="sl"></span><span class="tl">Enable fuzzy matching signal</span></label>
+            <label class="tgl"><input type="checkbox" id="tglAttr" checked /><span class="sl"></span><span class="tl">Enable technical-attribute signal</span></label>
+            <label class="tgl"><input type="checkbox" id="tglUnits" checked /><span class="sl"></span><span class="tl">Enable unit standardization<em>50 mm = 5 cm = 1.97 inch</em></span></label>
+          </section>
+        </div>
+
+        <div class="split">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Decision thresholds</h2><p class="muted">Where the engine stops deciding and the expert starts.</p></div></header>
+            <label class="field range"><span>Auto-accept at or above <b id="autoVal">0.85</b></span><input type="range" id="autoRange" min="0.6" max="0.98" step="0.01" value="0.85" /></label>
+            <label class="field range"><span>Minimum score that enters review <b id="floorVal">0.55</b></span><input type="range" id="floorRange" min="0.3" max="0.8" step="0.01" value="0.55" /></label>
+            <label class="field range"><span>Candidate pairs kept per record <b id="candVal">8</b></span><input type="range" id="candRange" min="2" max="20" step="1" value="8" /></label>
+            <div class="unit-table" id="unitTable"></div>
+          </section>
+
+          <section class="panel">
+            <header class="panel-head"><div><h2>Rule inspector</h2><p class="muted">The live normalization and attribute-extraction result for any string you type.</p></div></header>
+            <div class="pg-row"><input type="text" id="ruleInput" value="BRG. DEEP GROOVE BALL 6205 ZZ (MAKE : SKF) 25 MM BORE - NOS" aria-label="Rule inspector input" /><button class="btn btn-ghost" id="ruleRun">Inspect</button></div>
+            <div class="rule-out" id="ruleOut"></div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <header class="panel-head"><div><h2>Normalization rule activity</h2><p class="muted">Which rule families fired across the corpus, and how many vendor names were neutralised.</p></div></header>
+          <div class="chart-box"><canvas id="chartRules" height="240" role="img" aria-label="Rule activity chart"></canvas></div>
+        </section>
+      </section>
+
+      <!-- ══════════════════════════════ ABOUT ═════════════════════════════════ -->
+      <section class="view" id="view-about" hidden>
+        <header class="view-head">
+          <div><h1>Team &amp; Approach</h1><p class="lede-sm">Smart India Hackathon 2026 · Problem SIH26099 · Theme: Smart Automation · Category: Software.</p></div>
+          <div class="view-head-actions"><button class="btn btn-ghost" id="printPitch">Print one-pager</button></div>
+        </header>
+
+        <div class="split">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Team Code Cosmos</h2><p class="muted">Replace the placeholder names below with your team details before submission.</p></div></header>
+            <ul class="team" id="teamList"></ul>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><div><h2>The core idea in one sentence</h2></div></header>
+            <blockquote class="quote">
+              Code Cosmos proposes an AI-driven, human-in-the-loop system that converts inconsistent CPSE material records into
+              standardized material knowledge by combining semantic similarity, fuzzy matching, technical-attribute extraction,
+              unit normalization, confidence scoring, expert validation and CNMC code mapping.
+            </blockquote>
+            <div class="stack-list" id="uniqueList"></div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <header class="panel-head"><div><h2>Research foundation → what we extend</h2><p class="muted">Existing work answers “are these two entities similar?”. This system answers “are they equivalent, what defines them, what should they map to, and how sure are we?”.</p></div></header>
+          <div class="table-scroll">
+            <table class="tbl">
+              <thead><tr><th>Research foundation</th><th>Focus</th><th>Code Cosmos extension</th></tr></thead>
+              <tbody>
+                <tr><td>Purnomo &amp; Triayudi, 2026<em>Semantic Deduplication of Industrial Material Records</em></td><td>Sentence-BERT embeddings for semantic deduplication</td><td>Embeddings <b>plus</b> unit-standardized technical attributes, so 6205 ≠ 6206 even at high cosine similarity</td></tr>
+                <tr><td>Su et al., 2025<em>Material Master Data Governance using LLM + RAG</em></td><td>LLM + retrieval for master-data governance</td><td>Deterministic, auditable scoring that runs offline — no hallucination risk on code assignment</td></tr>
+                <tr><td>Nananukul et al., 2024<em>Product Matching for Entity Resolution</em></td><td>Prompt engineering for unsupervised entity resolution</td><td>Supervised-by-ground-truth operating points with measured precision / recall / F1</td></tr>
+                <tr><td>ProMap datasets (extended), 2024</td><td>Product mapping / matching benchmarks</td><td>Mapping target is a CPSE material code and CNMC class, not a product catalogue id</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <div class="split">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Architecture</h2><p class="muted">Prototype today, production tomorrow — the layer boundaries are already the deployment boundaries.</p></div></header>
+            <ul class="arch" id="archList"></ul>
+          </section>
+          <section class="panel">
+            <header class="panel-head"><div><h2>Benefits</h2><p class="muted">Social, economic, environmental and technical.</p></div></header>
+            <div class="benefit-grid" id="benefitGrid"></div>
+          </section>
+        </div>
+
+        <section class="panel">
+          <header class="panel-head"><div><h2>Feasibility &amp; roadmap</h2><p class="muted">What is demonstrably working now, and what changes when this stops being a prototype.</p></div></header>
+          <div class="roadmap" id="roadmap"></div>
+        </section>
+
+        <section class="panel disclaimer">
+          <header class="panel-head"><div><h2>Prototype disclosure</h2></div></header>
+          <ul class="fine-list">
+            <li>This build is a <b>100% client-side prototype</b>: HTML, CSS and vanilla ES modules only — no server, no Python, no external API keys.</li>
+            <li>The CPSE corpus is <b>synthetic</b> and generated deterministically from engineering concepts, so no real organization's material data is used. Ground truth is retained only to score the engine.</li>
+            <li>Semantic embeddings are a compact in-browser <b>concept tf-idf + random-projection model</b> standing in for a fine-tuned Sentence-BERT encoder; the interface is identical, so swapping in the production encoder changes only that one module.</li>
+            <li>CNMC class codes and generated material codes are <b>illustrative mappings</b> for the prototype and must be validated against the official CNMC taxonomy before production use.</li>
+          </ul>
+        </section>
+      </section>
+
+      <footer class="footer">
+        <div class="foot-left">
+          <strong>Code Cosmos</strong> · Material Code Harmonization Engine · SIH26099
+        </div>
+        <div class="foot-right">
+          <span class="muted small" id="footStats"></span>
+          <span class="dot-sep"></span>
+          <a class="small" href="#/about">Team &amp; approach</a>
+        </div>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<!-- ───────────────────────────── overlays ────────────────────────────────── -->
+<div class="drawer" id="drawer" hidden>
+  <div class="drawer-scrim" data-close-drawer></div>
+  <aside class="drawer-panel" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+    <header class="drawer-head">
+      <h2 id="drawerTitle">Record</h2>
+      <button class="icon-btn" data-close-drawer aria-label="Close panel">✕</button>
+    </header>
+    <div class="drawer-body" id="drawerBody"></div>
+  </aside>
+</div>
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="boot" id="boot">
+  <div class="boot-inner">
+    <span class="brand-mark lg">
+      <svg viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="29" fill="none" stroke="url(#brandGrad)" stroke-width="2.5" stroke-dasharray="6 5" class="dash-spin"/>
+        <ellipse cx="32" cy="32" rx="27" ry="11" fill="none" stroke="url(#brandGrad)" stroke-width="1.6" class="ring-a"/>
+        <circle cx="32" cy="32" r="8" fill="url(#brandGrad)" class="core-pulse"/>
+      </svg>
+    </span>
+    <p class="boot-title">Booting Code Cosmos engine</p>
+    <p class="mono small" id="bootMsg">loading modules …</p>
+    <div class="boot-bar"><i id="bootBar"></i></div>
+  </div>
+</div>
+<noscript><div class="noscript">This prototype needs JavaScript enabled — the entire harmonization engine runs in your browser.</div></noscript>
+
+<script type="module" src="./assets/js/main.js"></script>
+</body>
+</html>

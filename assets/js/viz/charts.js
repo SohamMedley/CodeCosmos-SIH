@@ -1,0 +1,444 @@
+/**
+ * Code Cosmos · Chart engine
+ * ------------------------------------------------------------------
+ * Dependency-free canvas charts with DPR-aware scaling, entry
+ * animation, hover read-outs and resize handling. Every chart is
+ * driven by real engine output — nothing is faked for the demo.
+ */
+
+const PALETTE = ['#22d3ee', '#8b5cf6', '#f472b6', '#34d399', '#fbbf24', '#60a5fa', '#a3e635', '#fb7185', '#c084fc', '#2dd4bf', '#f59e0b', '#38bdf8'];
+
+export function palette(i) { return PALETTE[i % PALETTE.length]; }
+
+function setup(canvas, cssHeight) {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const rect = canvas.getBoundingClientRect();
+  const w = Math.max(220, rect.width || canvas.parentElement.clientWidth || 480);
+  const h = cssHeight || rect.height || 220;
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+  canvas.style.height = `${h}px`;
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, w, h);
+  return { ctx, w, h, dpr };
+}
+
+function themeColors() {
+  const light = document.documentElement.getAttribute('data-theme') === 'light';
+  return {
+    light,
+    grid: light ? 'rgba(28,46,110,0.12)' : 'rgba(148,173,255,0.12)',
+    axis: light ? 'rgba(28,46,110,0.32)' : 'rgba(148,173,255,0.3)',
+    text: light ? '#5a6791' : '#8593b8',
+    textStrong: light ? '#0d1531' : '#eaf0ff'
+  };
+}
+
+function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+
+function animate(canvas, duration, draw) {
+  const start = performance.now();
+  const run = (now) => {
+    const t = Math.min(1, (now - start) / duration);
+    draw(easeOutCubic(t));
+    if (t < 1) canvas._raf = requestAnimationFrame(run);
+  };
+  cancelAnimationFrame(canvas._raf);
+  canvas._raf = requestAnimationFrame(run);
+}
+
+function attachHover(canvas, hitTest, tooltip) {
+  if (canvas._hoverBound) return;
+  canvas._hoverBound = true;
+  const tip = document.createElement('div');
+  tip.className = 'chart-tip';
+  Object.assign(tip.style, {
+    position: 'absolute', pointerEvents: 'none', padding: '7px 11px', borderRadius: '10px',
+    background: 'rgba(8,12,26,0.94)', border: '1px solid rgba(148,173,255,0.3)', color: '#eaf0ff',
+    fontSize: '12px', fontFamily: 'var(--mono)', whiteSpace: 'pre', opacity: '0', transition: 'opacity .15s',
+    transform: 'translate(-50%, -120%)', zIndex: 5
+  });
+  const holder = canvas.parentElement;
+  if (getComputedStyle(holder).position === 'static') holder.style.position = 'relative';
+  holder.appendChild(tip);
+  canvas.addEventListener('mousemove', (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left; const y = e.clientY - rect.top;
+    const hit = hitTest(x, y);
+    if (!hit) { tip.style.opacity = '0'; return; }
+    tip.textContent = tooltip(hit);
+    tip.style.left = `${x}px`; tip.style.top = `${y}px`; tip.style.opacity = '1';
+  });
+  canvas.addEventListener('mouseleave', () => { tip.style.opacity = '0'; });
+}
+
+/* ============================== line chart ============================== */
+/**
+ * @param {HTMLCanvasElement} canvas
+ * @param {{series:Array<{name:string,color:string,points:Array<{x:number,y:number}>}>, xLabel?:string, yLabel?:string, marker?:{x:number,label:string}, yMax?:number, xMin?:number, xMax?:number}} opts
+ */
+export function lineChart(canvas, opts) {
+  const draw = () => {
+    const { ctx, w, h } = setup(canvas, canvas.dataset.height ? Number(canvas.dataset.height) : 260);
+    const T = themeColors();
+    const pad = { l: 46, r: 16, t: 16, b: 34 };
+    const plotW = w - pad.l - pad.r;
+    const plotH = h - pad.t - pad.b;
+    const series = opts.series || [];
+    const xs = series.flatMap((s) => s.points.map((p) => p.x));
+    const xMin = opts.xMin ?? Math.min(...xs);
+    const xMax = opts.xMax ?? Math.max(...xs);
+    const yMax = opts.yMax ?? 1;
+    const X = (v) => pad.l + ((v - xMin) / (xMax - xMin || 1)) * plotW;
+    const Y = (v) => pad.t + plotH - (v / yMax) * plotH;
+
+    ctx.strokeStyle = T.grid; ctx.lineWidth = 1;
+    ctx.fillStyle = T.text; ctx.font = '11px var(--mono, monospace)';
+    const gridLines = 5;
+    for (let i = 0; i <= gridLines; i++) {
+      const v = (yMax / gridLines) * i;
+      const y = Math.round(Y(v)) + 0.5;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(v.toFixed(2), pad.l - 8, y);
+    }
+    const ticks = 6;
+    for (let i = 0; i <= ticks; i++) {
+      const v = xMin + ((xMax - xMin) / ticks) * i;
+      const x = Math.round(X(v)) + 0.5;
+      ctx.beginPath(); ctx.moveTo(x, pad.t); ctx.lineTo(x, pad.t + plotH); ctx.stroke();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.fillText(v.toFixed(2), x, pad.t + plotH + 8);
+    }
+    ctx.strokeStyle = T.axis;
+    ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + plotH); ctx.lineTo(w - pad.r, pad.t + plotH); ctx.stroke();
+
+    if (opts.marker) {
+      const mx = X(opts.marker.x);
+      ctx.save();
+      ctx.strokeStyle = 'rgba(251,191,36,0.85)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
+      ctx.beginPath(); ctx.moveTo(mx, pad.t); ctx.lineTo(mx, pad.t + plotH); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = '#fbbf24'; ctx.font = '600 11px var(--mono, monospace)'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText(opts.marker.label, Math.min(w - 46, Math.max(pad.l + 30, mx)), pad.t + 12);
+    }
+
+    animate(canvas, 850, (p) => {
+      const { ctx: c } = setup(canvas, h);
+      const g2 = themeColors();
+      // grid is redrawn (cheap) to keep the frame self-contained
+      c.strokeStyle = g2.grid;
+      for (let i = 0; i <= gridLines; i++) {
+        const y = Math.round(Y((yMax / gridLines) * i)) + 0.5;
+        c.beginPath(); c.moveTo(pad.l, y); c.lineTo(w - pad.r, y); c.stroke();
+      }
+      c.strokeStyle = g2.axis;
+      c.beginPath(); c.moveTo(pad.l, pad.t); c.lineTo(pad.l, pad.t + plotH); c.lineTo(w - pad.r, pad.t + plotH); c.stroke();
+      c.fillStyle = g2.text; c.font = '11px var(--mono, monospace)';
+      for (let i = 0; i <= gridLines; i++) {
+        const v = (yMax / gridLines) * i;
+        c.textAlign = 'right'; c.textBaseline = 'middle';
+        c.fillText(v.toFixed(2), pad.l - 8, Y(v));
+      }
+      for (let i = 0; i <= ticks; i++) {
+        const v = xMin + ((xMax - xMin) / ticks) * i;
+        c.textAlign = 'center'; c.textBaseline = 'top';
+        c.fillText(v.toFixed(2), X(v), pad.t + plotH + 8);
+      }
+      if (opts.marker) {
+        c.strokeStyle = 'rgba(251,191,36,0.85)'; c.lineWidth = 1.5; c.setLineDash([5, 4]);
+        c.beginPath(); c.moveTo(X(opts.marker.x), pad.t); c.lineTo(X(opts.marker.x), pad.t + plotH); c.stroke();
+        c.setLineDash([]);
+      }
+
+      series.forEach((s, si) => {
+        const pts = s.points;
+        if (!pts.length) return;
+        const upto = Math.max(1, Math.floor(pts.length * p));
+        // area
+        c.beginPath();
+        c.moveTo(X(pts[0].x), Y(0));
+        for (let i = 0; i < upto; i++) c.lineTo(X(pts[i].x), Y(pts[i].y));
+        c.lineTo(X(pts[upto - 1].x), Y(0));
+        c.closePath();
+        const grad = c.createLinearGradient(0, pad.t, 0, pad.t + plotH);
+        grad.addColorStop(0, `${s.color}44`);
+        grad.addColorStop(1, `${s.color}00`);
+        c.fillStyle = grad; c.fill();
+        // line
+        c.beginPath();
+        for (let i = 0; i < upto; i++) {
+          const x = X(pts[i].x); const y = Y(pts[i].y);
+          if (i === 0) c.moveTo(x, y); else c.lineTo(x, y);
+        }
+        c.strokeStyle = s.color; c.lineWidth = 2.4; c.lineJoin = 'round';
+        c.shadowColor = s.color; c.shadowBlur = 12;
+        c.stroke();
+        c.shadowBlur = 0;
+        // last dot
+        const last = pts[upto - 1];
+        c.beginPath(); c.arc(X(last.x), Y(last.y), 3.6, 0, Math.PI * 2);
+        c.fillStyle = s.color; c.fill();
+        c.strokeStyle = '#0b1020'; c.lineWidth = 2; c.stroke();
+        void si;
+      });
+    });
+
+    canvas._hitTest = (mx, my) => {
+      let best = null;
+      series.forEach((s) => s.points.forEach((pt) => {
+        const d = Math.hypot(X(pt.x) - mx, Y(pt.y) - my);
+        if (d < 16 && (!best || d < best.d)) best = { d, pt, s };
+      }));
+      return best;
+    };
+  };
+
+  draw();
+  bindResize(canvas, draw);
+  attachHover(canvas, (x, y) => canvas._hitTest && canvas._hitTest(x, y),
+    (hit) => `${hit.s.name}\n${opts.xLabel || 'threshold'} ${hit.pt.x.toFixed(2)} → ${hit.pt.y.toFixed(3)}`);
+}
+
+/* ============================== bar chart ============================== */
+/**
+ * @param {{items:Array<{label:string,value:number,color?:string}>, horizontal?:boolean, unit?:string, maxLabel?:number}} opts
+ */
+export function barChart(canvas, opts) {
+  const draw = () => {
+    const horizontal = opts.horizontal !== false;
+    const items = (opts.items || []).slice(0, 18);
+    const height = horizontal ? Math.max(160, items.length * 34 + 16) : 240;
+    const { ctx, w, h } = setup(canvas, canvas.dataset.height ? Number(canvas.dataset.height) : height);
+    const T = themeColors();
+    const max = Math.max(...items.map((i) => i.value), 1);
+
+    if (horizontal) {
+      const labelW = Math.min(190, Math.max(110, w * 0.42));
+      const barMax = w - labelW - 60;
+      items.forEach((it, idx) => {
+        const y = 8 + idx * 34;
+        ctx.fillStyle = T.text; ctx.font = '11.5px var(--font, sans-serif)';
+        ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+        const label = it.label.length > 30 ? `${it.label.slice(0, 29)}…` : it.label;
+        ctx.fillText(label, labelW - 10, y + 11);
+        ctx.fillStyle = T.grid;
+        roundRect(ctx, labelW, y + 3, barMax, 17, 8); ctx.fill();
+        const bw = Math.max(3, (it.value / max) * barMax);
+        const g = ctx.createLinearGradient(labelW, 0, labelW + bw, 0);
+        const col = it.color || palette(idx);
+        g.addColorStop(0, col); g.addColorStop(1, `${col}55`);
+        ctx.fillStyle = g;
+        roundRect(ctx, labelW, y + 3, bw, 17, 8); ctx.fill();
+        ctx.fillStyle = T.textStrong; ctx.textAlign = 'left';
+        ctx.font = '600 11px var(--mono, monospace)';
+        ctx.fillText(fmtNum(it.value), labelW + bw + 8, y + 12);
+      });
+    } else {
+      const pad = { l: 34, r: 10, t: 12, b: 34 };
+      const plotW = w - pad.l - pad.r; const plotH = h - pad.t - pad.b;
+      const bw = plotW / items.length;
+      ctx.strokeStyle = T.grid;
+      for (let i = 0; i <= 4; i++) {
+        const y = Math.round(pad.t + (plotH / 4) * i) + 0.5;
+        ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+      }
+      items.forEach((it, idx) => {
+        const bh = (it.value / max) * plotH;
+        const x = pad.l + idx * bw + bw * 0.18;
+        const color = it.color || palette(idx);
+        const g = ctx.createLinearGradient(0, pad.t + plotH - bh, 0, pad.t + plotH);
+        g.addColorStop(0, color); g.addColorStop(1, `${color}44`);
+        ctx.fillStyle = g;
+        roundRect(ctx, x, pad.t + plotH - bh, bw * 0.64, bh, 6); ctx.fill();
+        ctx.fillStyle = T.text; ctx.font = '10px var(--mono, monospace)';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        const lbl = it.label.length > 10 ? `${it.label.slice(0, 9)}…` : it.label;
+        ctx.fillText(lbl, x + bw * 0.32, pad.t + plotH + 7);
+      });
+      ctx.strokeStyle = T.axis;
+      ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + plotH); ctx.stroke();
+    }
+
+    canvas._items = items;
+    canvas._geometry = { horizontal, w, h };
+  };
+  draw();
+  bindResize(canvas, draw);
+  attachHover(canvas, (x, y) => {
+    const g = canvas._geometry;
+    if (!g) return null;
+    if (g.horizontal) {
+      const idx = Math.floor((y - 8) / 34);
+      const it = canvas._items[idx];
+      return it ? { it, x, y } : null;
+    }
+    const pad = { l: 34, r: 10 };
+    const bw = (g.w - pad.l - pad.r) / canvas._items.length;
+    const idx = Math.floor((x - pad.l) / bw);
+    const it = canvas._items[idx];
+    return it ? { it, x, y } : null;
+  }, (hit) => `${hit.it.label}\n${fmtNum(hit.it.value)}${opts.unit ? ` ${opts.unit}` : ''}`);
+}
+
+/* ============================= histogram ============================= */
+export function histogramChart(canvas, opts) {
+  const items = (opts.bins || []).map((b, i) => ({
+    label: `${fmtNum(b.bin[0], 2)}–${fmtNum(b.bin[1], 2)}`,
+    value: b.count,
+    color: opts.colors ? opts.colors[i] : null
+  }));
+  barChart(canvas, { items, horizontal: false });
+}
+
+/* ============================= scatter ============================= */
+/**
+ * @param {{points:Array<{x:number,y:number,label?:string,color?:string,group?:string,r?:number}>, onClick?:Function, legend?:boolean}} opts
+ */
+export function scatterChart(canvas, opts) {
+  const draw = () => {
+    const { ctx, w, h } = setup(canvas, canvas.dataset.height ? Number(canvas.dataset.height) : 330);
+    const T = themeColors();
+    const pad = 26;
+    const plotW = w - pad * 2; const plotH = h - pad * 2;
+    ctx.strokeStyle = T.grid;
+    for (let i = 0; i <= 4; i++) {
+      ctx.beginPath(); ctx.moveTo(pad + (plotW / 4) * i, pad); ctx.lineTo(pad + (plotW / 4) * i, pad + plotH); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(pad, pad + (plotH / 4) * i); ctx.lineTo(pad + plotW, pad + (plotH / 4) * i); ctx.stroke();
+    }
+    ctx.strokeStyle = T.axis; ctx.strokeRect(pad, pad, plotW, plotH);
+
+    const pts = opts.points || [];
+    const sx = (v) => pad + ((v + 1.15) / 2.3) * plotW;
+    const sy = (v) => pad + plotH - ((v + 1.15) / 2.3) * plotH;
+
+    animate(canvas, 900, (p) => {
+      const { ctx: c } = setup(canvas, h);
+      c.strokeStyle = T.grid;
+      for (let i = 0; i <= 4; i++) {
+        c.beginPath(); c.moveTo(pad + (plotW / 4) * i, pad); c.lineTo(pad + (plotW / 4) * i, pad + plotH); c.stroke();
+        c.beginPath(); c.moveTo(pad, pad + (plotH / 4) * i); c.lineTo(pad + plotW, pad + (plotH / 4) * i); c.stroke();
+      }
+      c.strokeStyle = T.axis; c.strokeRect(pad, pad, plotW, plotH);
+      const n = Math.ceil(pts.length * p);
+      for (let i = 0; i < n; i++) {
+        const pt = pts[i];
+        const x = sx(pt.x); const y = sy(pt.y);
+        const col = pt.color || '#22d3ee';
+        c.beginPath(); c.arc(x, y, (pt.r || 3.6) * (0.6 + 0.4 * p), 0, Math.PI * 2);
+        c.fillStyle = `${col}c9`; c.fill();
+        if (pt.highlight) { c.strokeStyle = '#fff'; c.lineWidth = 1.6; c.stroke(); }
+      }
+      canvas._pts = pts; canvas._proj = { sx, sy };
+    });
+
+    canvas._hitTest = (mx, my) => {
+      let best = null;
+      pts.forEach((pt) => {
+        const d = Math.hypot(canvas._proj.sx(pt.x) - mx, canvas._proj.sy(pt.y) - my);
+        if (d < 11 && (!best || d < best.d)) best = { d, pt };
+      });
+      return best;
+    };
+  };
+  draw();
+  bindResize(canvas, draw);
+  attachHover(canvas, (x, y) => canvas._hitTest(x, y),
+    (hit) => `${hit.pt.label ? `${hit.pt.label}\n` : ''}${hit.pt.group || ''}`);
+  canvas.addEventListener('click', (e) => {
+    if (!opts.onClick) return;
+    const rect = canvas.getBoundingClientRect();
+    const hit = canvas._hitTest(e.clientX - rect.left, e.clientY - rect.top);
+    if (hit) opts.onClick(hit.pt);
+  });
+}
+
+/* ============================ grouped bars ============================ */
+export function groupedBarChart(canvas, opts) {
+  const draw = () => {
+    const { ctx, w, h } = setup(canvas, canvas.dataset.height ? Number(canvas.dataset.height) : 220);
+    const T = themeColors();
+    const groups = opts.groups || [];
+    const series = opts.series || [];
+    const pad = { l: 46, r: 16, t: 16, b: 40 };
+    const plotW = w - pad.l - pad.r; const plotH = h - pad.t - pad.b;
+    const max = Math.max(...groups.flatMap((g) => series.map((s) => g[s.key] || 0)), 1);
+    ctx.strokeStyle = T.grid;
+    ctx.fillStyle = T.text; ctx.font = '10.5px var(--mono, monospace)';
+    for (let i = 0; i <= 4; i++) {
+      const v = (max / 4) * i;
+      const y = pad.t + plotH - (v / max) * plotH;
+      ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(w - pad.r, y); ctx.stroke();
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(fmtNum(v), pad.l - 7, y);
+    }
+    const gw = plotW / groups.length;
+    groups.forEach((g, gi) => {
+      const bw = (gw * 0.7) / series.length;
+      series.forEach((s, si) => {
+        const v = g[s.key] || 0;
+        const bh = (v / max) * plotH;
+        const x = pad.l + gi * gw + gw * 0.15 + si * bw;
+        const col = s.color || palette(si);
+        const grad = ctx.createLinearGradient(0, pad.t + plotH - bh, 0, pad.t + plotH);
+        grad.addColorStop(0, col); grad.addColorStop(1, `${col}44`);
+        ctx.fillStyle = grad;
+        roundRect(ctx, x + 2, pad.t + plotH - bh, Math.max(2, bw - 4), bh, 5); ctx.fill();
+      });
+      ctx.fillStyle = T.text; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+      ctx.font = '11px var(--font, sans-serif)';
+      ctx.fillText(g.label, pad.l + gi * gw + gw / 2, pad.t + plotH + 10);
+    });
+    ctx.strokeStyle = T.axis;
+    ctx.beginPath(); ctx.moveTo(pad.l, pad.t); ctx.lineTo(pad.l, pad.t + plotH); ctx.lineTo(w - pad.r, pad.t + plotH); ctx.stroke();
+    canvas._groups = groups; canvas._series = series; canvas._geo = { pad, plotW, plotH, max };
+  };
+  draw();
+  bindResize(canvas, draw);
+}
+
+/* ============================== helpers ============================== */
+function roundRect(ctx, x, y, w, h, r) {
+  const rr = Math.min(r, h / 2, w / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+function fmtNum(v, dp) {
+  if (!Number.isFinite(v)) return '—';
+  if (dp !== undefined) return v.toFixed(dp);
+  if (Math.abs(v) >= 1000) return `${Math.round(v / 100) / 10}k`;
+  if (Math.abs(v) >= 10) return String(Math.round(v));
+  return String(Math.round(v * 1000) / 1000);
+}
+
+function bindResize(canvas, draw) {
+  canvas._redraw = draw;                       // lets redrawAll() re-render on theme change
+  if (canvas._resizeBound) return;
+  canvas._resizeBound = true;
+  let timer = null;
+  const ro = new ResizeObserver(() => {
+    clearTimeout(timer);
+    timer = setTimeout(draw, 130);
+  });
+  ro.observe(canvas.parentElement);
+}
+
+export function redrawAll(root = document) {
+  root.querySelectorAll('canvas').forEach((c) => {
+    if (typeof c._redraw === 'function') c._redraw();
+  });
+}
+
+/** Charts re-render on theme change so colours stay legible. */
+export function watchTheme(redraw) {
+  const mo = new MutationObserver(redraw);
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  return mo;
+}
