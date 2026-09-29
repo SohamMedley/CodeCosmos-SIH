@@ -4,13 +4,15 @@
 
 import { h, clear, qs, toast, openDrawer, kv, icon } from '../components/ui.js';
 
+/* Placeholder roster — replace the names with the real team before submission.
+   The roles are the ones this prototype actually required. */
 const TEAM = [
-  ['Team Lead', 'Code Cosmos', 'System architecture & matching strategy'],
-  ['Member 1', 'Name', 'Data engineering & attribute ontology'],
-  ['Member 2', 'Name', 'Semantic embedding & evaluation'],
-  ['Member 3', 'Name', 'UI / UX & human-in-the-loop design'],
-  ['Member 4', 'Name', 'CNMC mapping & domain validation'],
-  ['Member 5', 'Name', 'Research, documentation & benchmarking']
+  ['Team Lead', 'Name Surname', 'System architecture, matching strategy, integration'],
+  ['Member 2', 'Name Surname', 'Data engineering and the attribute ontology'],
+  ['Member 3', 'Name Surname', 'Semantic embeddings and evaluation harness'],
+  ['Member 4', 'Name Surname', 'Interface design and human-in-the-loop review'],
+  ['Member 5', 'Name Surname', 'CNMC mapping and domain validation'],
+  ['Member 6', 'Name Surname', 'Research, documentation and benchmarking']
 ];
 
 const UNIQUE = [
@@ -53,11 +55,13 @@ export function initAbout(store) {
   const team = qs('#teamList');
   clear(team);
   TEAM.forEach(([role, name, focus], i) => {
-    if (name === 'Code Cosmos') {
-      team.append(h('li', {}, h('span', { class: 'av', text: 'CC' }), h('div', {}, h('b', { text: role }), h('small', { text: focus }))));
-      return;
-    }
-    team.append(h('li', {}, h('span', { class: 'av', text: String(i + 1) }), h('div', {}, h('b', { text: `${name} ${i}` }), h('small', { text: focus }))));
+    const initials = name === 'Name Surname' ? String(i + 1).padStart(2, '0') : name.split(' ').map((w) => w[0]).join('');
+    team.append(h('li', {},
+      h('span', { class: 'av', text: initials }),
+      h('span', { class: 'tm-role', text: role }),
+      h('b', { text: name }),
+      h('small', { text: focus })
+    ));
   });
 
   const unique = qs('#uniqueList');

@@ -25,12 +25,17 @@ const VIEWS = ['overview', 'pipeline', 'explorer', 'workbench', 'review', 'bench
 function initTheme() {
   let saved = null;
   try { saved = localStorage.getItem('codecosmos.theme'); } catch (e) { /* storage disabled */ }
-  // Light is the primary aesthetic; dark is used only when the visitor's
-  // system explicitly asks for it (and has not chosen a theme here).
-  const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-  store.setTheme(saved || (prefersDark ? 'dark' : 'light'));
+  if (saved) {
+    store.setTheme(saved, false);          // an earlier explicit choice wins
+  } else {
+    // Light is the primary aesthetic; dark is used only when the visitor's
+    // system explicitly asks for it. This is inferred, not chosen, so it is
+    // deliberately not persisted.
+    const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    store.setTheme(prefersDark ? 'dark' : 'light', false);
+  }
   qs('#themeBtn').addEventListener('click', () => {
-    store.setTheme(store.theme === 'dark' ? 'light' : 'dark');
+    store.setTheme(store.theme === 'dark' ? 'light' : 'dark', true);
     setTimeout(() => redrawAll(), 60);
   });
 }

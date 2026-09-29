@@ -189,10 +189,18 @@ export class Store {
     return best;
   }
 
-  setTheme(theme) {
+  /**
+   * @param {'light'|'dark'} theme
+   * @param {boolean} persist  Only an explicit user choice is written to
+   *   localStorage. A theme merely inferred from the OS setting must stay
+   *   unpersisted, otherwise it would win over any future OS change.
+   */
+  setTheme(theme, persist = true) {
     this.theme = theme;
     document.documentElement.setAttribute('data-theme', theme);
-    try { localStorage.setItem('codecosmos.theme', theme); } catch (e) { /* storage disabled */ }
+    if (persist) {
+      try { localStorage.setItem('codecosmos.theme', theme); } catch (e) { /* storage disabled */ }
+    }
     this.emit('theme', theme);
   }
 

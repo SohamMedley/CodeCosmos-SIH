@@ -129,8 +129,9 @@ The site needs no environment variables and makes no network calls.
 ├── index.html                 # application shell (all nine views)
 ├── render.yaml                # Render Blueprint (static site, headers, rewrites)
 ├── assets/
+│   ├── fonts/                 # self-hosted Inter + IBM Plex Mono (116 KB, offline-safe)
 │   ├── css/
-│   │   ├── base.css           # design tokens, cinematic background, animations
+│   │   ├── base.css           # tokens, type scale, motion library, reset
 │   │   └── app.css            # components, tables, charts, full responsiveness
 │   └── js/
 │       ├── main.js            # hash router, theme, global chrome
@@ -165,21 +166,31 @@ signal weights and thresholds.
 
 ## 8. Interface & design system
 
-* **Light theme by default.** The palette is light-first (`assets/css/base.css` holds both token sets); dark is applied
-  only when the visitor's system asks for it, and the topbar toggle switches instantly and redraws every canvas chart.
-* **No loading screen.** The shell renders straight into a usable state — there is no splash, spinner or artificial
-  delay anywhere in the boot path.
-* **Graded motion.** Entrance, hover, focus and state-change animation is defined once as a keyframe/timing library
-  (`--e-out`, `--e-soft`, `--e-spring`, `--e-inout`) with a stagger helper for lists and card grids. Charts animate
-  their own draw-in and always land on the final frame even if animation frames are throttled.
-* **Reduced motion respected.** `prefers-reduced-motion: reduce` collapses every transition and keyframe to its end
-  state.
-* **Icons are inline SVG.** No icon font, no external request, no unicode-glyph fallback that can render as tofu on a
-  machine with a different font stack.
-* **Responsive from 320 px to 1920 px.** All nine views were swept at twelve widths — 320, 360, 414, 480, 600, 768,
-  900, 1024, 1280, 1440, 1600 and 1920 px — with zero horizontal overflow at any of them.
-* **Accessible by construction.** Skip link, visible focus rings, `aria-live` regions for run status and toasts,
-  keyboard-driven workbench (`A` approve / `R` reject) and a guided tour that also runs on `←`/`→`/`Esc`.
+The interface is built as a **precision instrument**, not a marketing page. The rules are explicit and
+enforced in `assets/css/base.css`:
+
+| Principle | How it is applied |
+| --- | --- |
+| One accent colour | Indigo `#2f4fd8`. The four semantic colours (green / amber / red / blue) only ever describe data state — verified, review, conflict, informational. |
+| Structure from hairlines | Panels are defined by 1px borders. Shadows are reserved for genuinely floating surfaces (drawer, toasts, tour). |
+| Real typography | Self-hosted **Inter** for text and **IBM Plex Mono** for every code, number and readout, so no glyph depends on the visitor's OS font stack (116 KB total, no network request). |
+| Tabular numerals | Every metric, confidence value and count is set in tabular figures, so numbers do not jitter as they update. |
+| Restrained motion | One easing family, four durations (120 / 160 / 220 / 320 ms). Entrances rise 10px and settle; nothing bounces, spins or loops. |
+| Charts encode meaning | Rank-ordered bar charts use a single hue with a weight ramp. Colour is spent only where it carries information — engineering family in the semantic space, decision band in the confidence histogram. |
+
+Other interface decisions worth noting:
+
+* **Light theme is the default** and is the primary design. Dark is a full second treatment, applied only when
+  the visitor's system asks for it. A theme inferred from the OS is deliberately *not* written to storage, so a
+  later OS change is still honoured; only an explicit toggle is remembered.
+* **No loading screen**, no splash, no artificial delay — the shell renders straight into a usable state.
+* **All iconography is inline SVG.** The earlier unicode glyphs rendered as tofu boxes or emoji on some font
+  stacks. There is no icon font and no external request.
+* **Responsive from 320 px to 1920 px.** Every view was swept at twelve widths with zero horizontal overflow.
+  Grid minimums collapse with `minmax(min(Xpx, 100%), 1fr)` so one long unbreakable string can never widen the page.
+* **Accessible by construction**: skip link, visible focus rings, `aria-live` run status, keyboard-driven review
+  (`A` approve / `R` reject) and a guided tour that also runs on `←` / `→` / `Esc`.
+* **Reduced motion respected**: `prefers-reduced-motion: reduce` collapses every transition and keyframe to its end state.
 
 ---
 

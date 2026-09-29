@@ -117,7 +117,7 @@ export function initExplorer(store) {
         h('td', {}, h('span', { class: 'chip small', text: r.cpse })),
         h('td', {}, h('span', { class: 'pill', text: r.family.label })),
         h('td', {}, h('span', { class: 'mono small muted', text: `${r.specs.length}` })),
-        h('td', { class: 'mono small' }, master ? h('code', { class: 'mono small', style: { color: 'var(--cyan)' }, text: master.code }) : h('span', { class: 'muted', text: '—' })),
+        h('td', { class: 'mono small' }, master ? h('code', { class: 'mono small', style: { color: 'var(--accent)' }, text: master.code }) : h('span', { class: 'muted', text: '—' })),
         h('td', {}, best ? bandChip(best.band) : h('span', { class: 'muted small', text: 'distinct' }))
       );
       body.append(tr);

@@ -1,28 +1,19 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Code Cosmos · AI-Driven Standardization &amp; Harmonization of Material Codes Across CPSEs</title>
 <meta name="description" content="SIH26099 — AI-driven, human-in-the-loop material code harmonization prototype for CPSEs. Semantic embeddings, fuzzy matching, technical-attribute extraction, unit standardization, confidence scoring and CNMC mapping. Fully client-side prototype by Team Code Cosmos." />
-<meta name="theme-color" content="#060913" />
+<meta name="theme-color" content="#ffffff" />
 <meta name="author" content="Team Code Cosmos" />
 <meta property="og:title" content="Code Cosmos · Material Code Harmonization Engine" />
 <meta property="og:description" content="Smart India Hackathon 2026 · Problem SIH26099 · Frontend prototype" />
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%2322d3ee'/%3E%3Cstop offset='1' stop-color='%238b5cf6'/%3E%3C/linearGradient%3E%3C/defs%3E%3Ccircle cx='32' cy='32' r='30' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Ccircle cx='32' cy='32' r='9' fill='url(%23g)'/%3E%3Cellipse cx='32' cy='32' rx='28' ry='12' fill='none' stroke='url(%23g)' stroke-width='2' opacity='.7'/%3E%3Cellipse cx='32' cy='32' rx='12' ry='28' fill='none' stroke='url(%23g)' stroke-width='2' opacity='.5'/%3E%3C/svg%3E" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='5.5' fill='%232f4fd8'/%3E%3Cg fill='none' stroke='%23fff' stroke-width='1.7' stroke-linecap='round'%3E%3Cpath d='M5 6.5h3.2M5 12h3.2M5 17.5h3.2'/%3E%3Cpath d='M8.2 6.5c2.2 0 2.5 5.5 4.8 5.5M8.2 17.5c2.2 0 2.5-5.5 4.8-5.5M8.2 12h4.8'/%3E%3Cpath d='M13 12h6'/%3E%3C/g%3E%3Ccircle cx='12.4' cy='12' r='1.5' fill='%23fff'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="./assets/css/base.css" />
 <link rel="stylesheet" href="./assets/css/app.css" />
 </head>
 <body>
-<!-- ─────────────────────────── cinematic background ─────────────────────────── -->
-<div class="canvas-stage" aria-hidden="true">
-  <div class="aurora a1"></div>
-  <div class="aurora a2"></div>
-  <div class="aurora a3"></div>
-  <div class="grid-veil"></div>
-  <div class="vignette"></div>
-</div>
-
 <a class="skip-link" href="#main">Skip to content</a>
 
 <!-- ─────────────────────────────── app shell ───────────────────────────────── -->
@@ -33,23 +24,17 @@
     </button>
 
     <a class="brand" href="#/overview" aria-label="Code Cosmos home">
-      <span class="brand-mark orb" aria-hidden="true">
-        <svg viewBox="0 0 64 64" class="orbit">
-          <defs>
-            <linearGradient id="brandGrad" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#22d3ee"/><stop offset="0.5" stop-color="#8b5cf6"/><stop offset="1" stop-color="#f472b6"/>
-            </linearGradient>
-          </defs>
-          <circle cx="32" cy="32" r="29" fill="none" stroke="url(#brandGrad)" stroke-width="2.5" stroke-dasharray="6 5" class="dash-spin"/>
-          <ellipse cx="32" cy="32" rx="27" ry="11" fill="none" stroke="url(#brandGrad)" stroke-width="1.6" opacity=".75" class="ring-a"/>
-          <ellipse cx="32" cy="32" rx="11" ry="27" fill="none" stroke="url(#brandGrad)" stroke-width="1.6" opacity=".55" class="ring-b"/>
-          <circle cx="32" cy="32" r="8" fill="url(#brandGrad)" class="core-pulse"/>
-          <circle cx="59" cy="32" r="2.6" fill="#22d3ee" class="sat-a"/>
-          <circle cx="32" cy="5" r="2.2" fill="#f472b6" class="sat-b"/>
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" stroke-width="1.7">
+          <!-- many inconsistent codes converge into one standardized record -->
+          <path d="M3.5 6.5h4.6M3.5 12h4.6M3.5 17.5h4.6"/>
+          <path d="M8.1 6.5c2.6 0 2.9 5.5 5.6 5.5M8.1 17.5c2.6 0 2.9-5.5 5.6-5.5M8.1 12h5.6"/>
+          <path d="M13.7 12h6.4"/>
+          <circle cx="12.6" cy="12" r="1.55" fill="currentColor" stroke="none"/>
         </svg>
       </span>
       <span class="brand-text">
-        <strong>Code<span class="grad">Cosmos</span></strong>
+        <strong>Code Cosmos</strong>
         <small>Material Harmonization Engine</small>
       </span>
     </a>
@@ -59,7 +44,7 @@
         <i class="dot"></i>SIH26099
       </span>
       <span class="chip hide-sm" title="Team Code Cosmos">Team&nbsp;Code&nbsp;Cosmos</span>
-      <span class="chip chip-live hide-md is-ready" id="engineChip" title="Pipeline status">
+      <span class="chip chip-live hide-md" id="engineChip" title="Pipeline status">
         <i class="pulse"></i><span id="engineLabel">Idle</span>
       </span>
     </div>
@@ -134,7 +119,7 @@
             <div class="hero-panel">
               <div class="hp-head">
                 <span class="hp-title">Live pipeline</span>
-                <span class="chip chip-live"><i class="pulse"></i><span id="heroStatus">idle</span></span>
+                <span class="chip chip-live" id="heroChip"><i class="pulse"></i><span id="heroStatus">idle</span></span>
               </div>
               <div class="hp-stage">
                 <div class="ring-wrap">
@@ -328,7 +313,10 @@
           <section class="panel">
             <header class="panel-head"><div><h2>Why this score</h2><p class="muted">Auditable reasoning trail for the confidence value.</p></div></header>
             <ul class="reason" id="wbReason"></ul>
-            <div class="why-shared" id="wbShared"></div>
+            <div class="dr-block">
+              <h4>Shared evidence tokens</h4>
+              <div class="attr-pills" id="wbShared"></div>
+            </div>
           </section>
         </div>
 
@@ -464,6 +452,7 @@
         </header>
 
         <div class="split">
+          <div class="stack">
           <section class="panel">
             <header class="panel-head"><div><h2>Corpus</h2><p class="muted">Legacy records are generated from engineering concepts with realistic CPSE noise. Ground truth stays hidden from the matcher.</p></div></header>
             <label class="field range"><span>Records <b id="sizeVal">260</b></span><input type="range" id="sizeRange" min="60" max="600" step="20" value="260" /></label>
@@ -471,20 +460,6 @@
             <label class="tgl"><input type="checkbox" id="tglShowcase" checked /><span class="sl"></span><span class="tl">Include the SIH example descriptions verbatim<em>Bearing 6205, 6205 Deep Groove Ball Bearing, SKF 6205 BEARING …</em></span></label>
             <div class="btn-row"><button class="btn btn-ghost" id="regenSeed">New random seed</button><button class="btn btn-ghost" id="downloadCorpus">Download corpus CSV</button></div>
           </section>
-
-          <section class="panel">
-            <header class="panel-head"><div><h2>Signal fusion</h2><p class="muted">Weights combine semantic similarity, fuzzy text similarity and technical-attribute agreement into one confidence value.</p></div></header>
-            <label class="field range"><span>Semantic embeddings <b id="wSemVal">0.32</b></span><input type="range" id="wSem" min="0" max="1" step="0.02" value="0.32" /></label>
-            <label class="field range"><span>Fuzzy text matching <b id="wFzVal">0.24</b></span><input type="range" id="wFz" min="0" max="1" step="0.02" value="0.24" /></label>
-            <label class="field range"><span>Technical attributes <b id="wAtVal">0.44</b></span><input type="range" id="wAt" min="0" max="1" step="0.02" value="0.44" /></label>
-            <div class="weight-bar"><i id="wbSemBar"></i><i id="wbFzBar"></i><i id="wbAtBar"></i></div>
-            <label class="tgl"><input type="checkbox" id="tglFuzzy" checked /><span class="sl"></span><span class="tl">Enable fuzzy matching signal</span></label>
-            <label class="tgl"><input type="checkbox" id="tglAttr" checked /><span class="sl"></span><span class="tl">Enable technical-attribute signal</span></label>
-            <label class="tgl"><input type="checkbox" id="tglUnits" checked /><span class="sl"></span><span class="tl">Enable unit standardization<em>50 mm = 5 cm = 1.97 inch</em></span></label>
-          </section>
-        </div>
-
-        <div class="split">
           <section class="panel">
             <header class="panel-head"><div><h2>Decision thresholds</h2><p class="muted">Where the engine stops deciding and the expert starts.</p></div></header>
             <label class="field range"><span>Auto-accept at or above <b id="autoVal">0.85</b></span><input type="range" id="autoRange" min="0.6" max="0.98" step="0.01" value="0.85" /></label>
@@ -492,12 +467,26 @@
             <label class="field range"><span>Candidate pairs kept per record <b id="candVal">8</b></span><input type="range" id="candRange" min="2" max="20" step="1" value="8" /></label>
             <div class="unit-table" id="unitTable"></div>
           </section>
-
+          </div>
+          <div class="stack">
+          <section class="panel">
+            <header class="panel-head"><div><h2>Signal fusion</h2><p class="muted">Weights combine semantic similarity, fuzzy text similarity and technical-attribute agreement into one confidence value.</p></div></header>
+            <label class="field range"><span>Semantic embeddings <b id="wSemVal">0.32</b></span><input type="range" id="wSem" min="0" max="1" step="0.02" value="0.32" /></label>
+            <label class="field range"><span>Fuzzy text matching <b id="wFzVal">0.24</b></span><input type="range" id="wFz" min="0" max="1" step="0.02" value="0.24" /></label>
+            <label class="field range"><span>Technical attributes <b id="wAtVal">0.44</b></span><input type="range" id="wAt" min="0" max="1" step="0.02" value="0.44" /></label>
+            <div class="weight-bar"><i id="wbSemBar"></i><i id="wbFzBar"></i><i id="wbAtBar"></i></div>
+            <div class="dr-block"><h4>Active signals</h4>
+            <label class="tgl"><input type="checkbox" id="tglFuzzy" checked /><span class="sl"></span><span class="tl">Enable fuzzy matching signal</span></label>
+            <label class="tgl"><input type="checkbox" id="tglAttr" checked /><span class="sl"></span><span class="tl">Enable technical-attribute signal</span></label>
+            <label class="tgl"><input type="checkbox" id="tglUnits" checked /><span class="sl"></span><span class="tl">Enable unit standardization<em>50 mm = 5 cm = 1.97 inch</em></span></label>
+            </div>
+          </section>
           <section class="panel">
             <header class="panel-head"><div><h2>Rule inspector</h2><p class="muted">The live normalization and attribute-extraction result for any string you type.</p></div></header>
             <div class="pg-row"><input type="text" id="ruleInput" value="BRG. DEEP GROOVE BALL 6205 ZZ (MAKE : SKF) 25 MM BORE - NOS" aria-label="Rule inspector input" /><button class="btn btn-ghost" id="ruleRun">Inspect</button></div>
             <div class="rule-out" id="ruleOut"></div>
           </section>
+          </div>
         </div>
 
         <section class="panel">

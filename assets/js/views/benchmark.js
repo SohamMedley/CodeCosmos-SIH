@@ -66,7 +66,18 @@ export function initBenchmark(store) {
 
     const conf = qs('#chartConf');
     conf.dataset.height = '240';
-    histogramChart(conf, { bins: m.analytics.confidenceHistogram });
+    // Colour each bar by the decision band its midpoint falls into, so the
+    // distribution reads against the same bands listed directly below it.
+    // The 2D canvas context cannot resolve CSS custom properties, so these
+    // literals mirror the theme tokens in base.css.
+    const dark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const bandColor = (mid) => (mid >= 0.85 ? (dark ? '#4ade80' : '#067647')
+      : mid >= 0.65 ? (dark ? '#7dabff' : '#175cd3')
+      : mid >= 0.42 ? (dark ? '#fbbf24' : '#b54708')
+      : (dark ? '#63636d' : '#a1a1aa'));
+    histogramChart(conf, {
+      bins: m.analytics.confidenceHistogram.map((b) => ({ ...b, color: bandColor(Number(b.mid ?? b.label?.split('–')[0] ?? 0)) }))
+    });
     conf.dataset.height = '';
 
     const bands = qs('#bandList');
@@ -96,8 +107,8 @@ export function initBenchmark(store) {
         { label: 'Assisted', manual: 0, assisted: m.estimatedAssistedHours * 60 }
       ],
       series: [
-        { key: 'manual', name: 'Reviewer minutes — manual', color: '#fb7185' },
-        { key: 'assisted', name: 'Reviewer minutes — assisted', color: '#34d399' }
+        { key: 'manual', name: 'Reviewer minutes — manual', color: '#b42318' },
+        { key: 'assisted', name: 'Reviewer minutes — assisted', color: '#067647' }
       ]
     });
     effort.dataset.height = '';
@@ -132,9 +143,9 @@ export function initBenchmark(store) {
     if (!m) return;
     lineChart(prCanvas, {
       series: [
-        { name: 'Precision', color: '#34d399', points: m.sweep.map((s) => ({ x: s.threshold, y: s.precision })) },
-        { name: 'Recall', color: '#22d3ee', points: m.sweep.map((s) => ({ x: s.threshold, y: s.recall })) },
-        { name: 'F1', color: '#a855f7', points: m.sweep.map((s) => ({ x: s.threshold, y: s.f1 })) }
+        { name: 'Precision', color: '#2f4fd8', points: m.sweep.map((s) => ({ x: s.threshold, y: s.precision })) },
+        { name: 'Recall', color: '#0f766e', points: m.sweep.map((s) => ({ x: s.threshold, y: s.recall })) },
+        { name: 'F1', color: '#b45309', points: m.sweep.map((s) => ({ x: s.threshold, y: s.f1 })) }
       ],
       xLabel: 'threshold',
       yMax: 1,

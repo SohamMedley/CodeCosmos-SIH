@@ -53,6 +53,10 @@ services:
       - path: /assets/css/*
         name: Cache-Control
         value: public, max-age=300, must-revalidate
+      # Self-hosted webfonts are immutable.
+      - path: /assets/fonts/*
+        name: Cache-Control
+        value: public, max-age=31536000, immutable
       - path: /
         name: Cache-Control
         value: public, max-age=0, must-revalidate

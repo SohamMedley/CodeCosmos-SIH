@@ -197,20 +197,30 @@ export function initReveal() {
 export function renderPager(host, { total, page, pageSize, onPage }) {
   clear(host);
   const pages = Math.max(1, Math.ceil(total / pageSize));
-  const mk = (label, target, disabled = false, active = false) => h('button', {
-    class: active ? 'active' : '', disabled, text: label,
-    onclick: () => onPage(Math.min(pages, Math.max(1, target)))
+  const current = Math.min(pages, Math.max(1, page));
+  const go = (target) => onPage(Math.min(pages, Math.max(1, target)));
+  const mk = (label, target, { disabled = false, active = false, aria } = {}) => h('button', {
+    class: `btn sm ${active ? 'btn-primary' : 'btn-ghost'}`,
+    type: 'button',
+    disabled: disabled || undefined,
+    text: label,
+    'aria-label': aria || label,
+    'aria-current': active ? 'page' : undefined,
+    onclick: () => go(target)
   });
+
+  const from = Math.max(1, Math.min(current - 2, Math.max(1, pages - 4)));
+  const to = Math.min(pages, from + 4);
+  const nums = [];
+  for (let i = from; i <= to; i++) nums.push(mk(String(i), i, { active: i === current, aria: `Page ${i}` }));
+
   host.append(
-    h('span', { class: 'muted small', text: `${fmtInt(total)} rows · page ${page} / ${pages}` }),
-    mk('‹', page - 1, page <= 1),
-    (() => {
-      const out = [];
-      const from = Math.max(1, page - 2); const to = Math.min(pages, from + 4);
-      for (let i = from; i <= to; i++) out.push(mk(String(i), i, false, i === page));
-      return out;
-    })(),
-    mk('›', page + 1, page >= pages)
+    h('span', { class: 'pg-info', text: `${fmtInt(total)} rows · page ${current} of ${pages}` }),
+    h('div', { class: 'pg-btns' },
+      mk('Previous', current - 1, { disabled: current <= 1, aria: 'Previous page' }),
+      ...nums,
+      mk('Next', current + 1, { disabled: current >= pages, aria: 'Next page' })
+    )
   );
 }
 

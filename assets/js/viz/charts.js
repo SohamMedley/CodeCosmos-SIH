@@ -6,8 +6,20 @@
  * driven by real engine output — nothing is faked for the demo.
  */
 
-const PALETTE = ['#0ea5e9', '#7c3aed', '#db2777', '#059669', '#d97706', '#2563eb', '#65a30d', '#e11d48', '#9333ea', '#0d9488', '#ea580c', '#0891b2'];
-const PALETTE_DARK = ['#22d3ee', '#a855f7', '#f472b6', '#34d399', '#fbbf24', '#60a5fa', '#a3e635', '#fb7185', '#c084fc', '#2dd4bf', '#f59e0b', '#38bdf8'];
+/**
+ * Categorical palette — ten muted, evenly weighted hues with no neon and no
+ * two adjacent colours that read as "the same". Deliberately closer to a
+ * cartographic palette than to a default charting library.
+ */
+const PALETTE = ['#3f5bd9', '#0f766e', '#b45309', '#be123c', '#6d28d9',
+                 '#15803d', '#0369a1', '#a21caf', '#78350f', '#475569'];
+const PALETTE_DARK = ['#8098f5', '#2dd4bf', '#fbbf24', '#fb7185', '#a78bfa',
+                      '#4ade80', '#38bdf8', '#e879f9', '#d6a77a', '#94a3b8'];
+
+/** The single accent used for rank-ordered data, where hue carries no meaning. */
+export function accentColor() {
+  return document.documentElement.getAttribute('data-theme') === 'dark' ? '#7b93ff' : '#2f4fd8';
+}
 
 export function palette(i) {
   const light = document.documentElement.getAttribute('data-theme') !== 'dark';
@@ -37,10 +49,10 @@ function themeColors() {
   const light = document.documentElement.getAttribute('data-theme') !== 'dark';
   return {
     light,
-    grid: light ? 'rgba(24,40,100,0.085)' : 'rgba(148,173,255,0.11)',
-    axis: light ? 'rgba(24,40,100,0.22)' : 'rgba(148,173,255,0.26)',
-    text: light ? '#6b7699' : '#8593b8',
-    textStrong: light ? '#0e1734' : '#eaf0ff',
+    grid: light ? 'rgba(9,9,11,0.055)' : 'rgba(255,255,255,0.065)',
+    axis: light ? 'rgba(9,9,11,0.16)' : 'rgba(255,255,255,0.17)',
+    text: light ? '#71717a' : '#8f8f98',
+    textStrong: light ? '#09090b' : '#fafafa',
     font: getComputedStyle(document.body).fontFamily || 'sans-serif',
     mono: getComputedStyle(document.body).getPropertyValue('--mono').trim() || 'monospace'
   };
@@ -142,7 +154,7 @@ export function lineChart(canvas, opts) {
       ctx.strokeStyle = 'rgba(251,191,36,0.85)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 4]);
       ctx.beginPath(); ctx.moveTo(mx, pad.t); ctx.lineTo(mx, pad.t + plotH); ctx.stroke();
       ctx.restore();
-      ctx.fillStyle = '#fbbf24'; ctx.font = `600 11px ${T.mono}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillStyle = '#b45309'; ctx.font = `600 11px ${T.mono}`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
       ctx.fillText(opts.marker.label, Math.min(w - 46, Math.max(pad.l + 30, mx)), pad.t + 12);
     }
 
@@ -202,7 +214,7 @@ export function lineChart(canvas, opts) {
         const last = pts[upto - 1];
         c.beginPath(); c.arc(X(last.x), Y(last.y), 4, 0, Math.PI * 2);
         c.fillStyle = s.color; c.fill();
-        c.strokeStyle = T.light ? '#ffffff' : '#0b1020'; c.lineWidth = 2; c.stroke();
+        c.strokeStyle = T.light ? '#ffffff' : '#131316'; c.lineWidth = 2; c.stroke();
         void si;
       });
     });
@@ -231,6 +243,15 @@ export function barChart(canvas, opts) {
   const draw = () => {
     const horizontal = opts.horizontal !== false;
     const items = (opts.items || []).slice(0, 18);
+    // When hue carries no meaning — a ranked bar chart of CPSE counts, of rule
+    // hits — one hue with a weight ramp is calmer and easier to read than a
+    // different colour per row. Callers opt into categorical colour by
+    // supplying an explicit `color` on each item.
+    const mono = !items.some((it) => it.color);
+    const ramp = (idx) => {
+      const t = items.length > 1 ? idx / (items.length - 1) : 0;
+      return { base: accentColor(), alpha: Math.max(0.32, 1 - t * 0.62) };
+    };
     const height = horizontal ? Math.max(160, items.length * 34 + 16) : 240;
     const { ctx, w, h } = setup(canvas, canvas.dataset.height ? Number(canvas.dataset.height) : height);
     const T = themeColors();
@@ -245,16 +266,14 @@ export function barChart(canvas, opts) {
         ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
         const label = it.label.length > 30 ? `${it.label.slice(0, 29)}…` : it.label;
         ctx.fillText(label, labelW - 10, y + 11);
-        ctx.fillStyle = T.grid;
-        roundRect(ctx, labelW, y + 3, barMax, 17, 8); ctx.fill();
         const bw = Math.max(3, (it.value / max) * barMax);
         const col = it.color || palette(idx);
-        ctx.fillStyle = T.light ? 'rgba(24,40,100,0.055)' : 'rgba(148,173,255,0.08)';
-        roundRect(ctx, labelW, y + 3, barMax, 17, 8); ctx.fill();
-        const g = ctx.createLinearGradient(labelW, 0, labelW + bw, 0);
-        g.addColorStop(0, col); g.addColorStop(1, `${col}88`);
-        ctx.fillStyle = g;
-        roundRect(ctx, labelW, y + 3, bw, 17, 8); ctx.fill();
+        ctx.fillStyle = T.grid;
+        roundRect(ctx, labelW, y + 3, barMax, 15, 7); ctx.fill();
+        ctx.globalAlpha = mono ? ramp(idx).alpha : 1;
+        ctx.fillStyle = mono ? ramp(idx).base : col;
+        roundRect(ctx, labelW, y + 3, bw, 15, 7); ctx.fill();
+        ctx.globalAlpha = 1;
         ctx.fillStyle = T.textStrong; ctx.textAlign = 'left';
         ctx.font = `600 11px ${T.mono}`;
         ctx.fillText(fmtNum(it.value), labelW + bw + 8, y + 12);
@@ -284,8 +303,8 @@ export function barChart(canvas, opts) {
           const bh = Math.max(0, target * p);
           const x = pad.l + idx * bw + bw * 0.18;
           const bwid = bw * 0.64;
-          const color = it.color || palette(idx);
-          c.fillStyle = th.light ? 'rgba(24,40,100,0.05)' : 'rgba(148,173,255,0.07)';
+          const color = it.color || accentColor();
+          c.fillStyle = th.light ? 'rgba(9,9,11,0.045)' : 'rgba(255,255,255,0.06)';
           roundRect(c, x, pad.t + plotH - target, bwid, target, 7); c.fill();
           const g = c.createLinearGradient(0, pad.t + plotH - bh, 0, pad.t + plotH);
           g.addColorStop(0, color); g.addColorStop(1, `${color}99`);
@@ -337,8 +356,8 @@ export function barChart(canvas, opts) {
           const bh = Math.max(0, target * p);
           const x = pad.l + idx * bw + bw * 0.18;
           const bwid = bw * 0.64;
-          const color = it.color || palette(idx);
-          c.fillStyle = th.light ? 'rgba(24,40,100,0.05)' : 'rgba(148,173,255,0.07)';
+          const color = it.color || accentColor();
+          c.fillStyle = th.light ? 'rgba(9,9,11,0.045)' : 'rgba(255,255,255,0.06)';
           roundRect(c, x, pad.t + plotH - target, bwid, target, 7); c.fill();
           const g = c.createLinearGradient(0, pad.t + plotH - bh, 0, pad.t + plotH);
           g.addColorStop(0, color); g.addColorStop(1, `${color}99`);
@@ -375,10 +394,14 @@ export function barChart(canvas, opts) {
 
 /* ============================= histogram ============================= */
 export function histogramChart(canvas, opts) {
+  const MID = (b) => (b.bin ? (b.bin[0] + b.bin[1]) / 2 : Number(b.mid) || 0);
   const items = (opts.bins || []).map((b, i) => ({
     label: `${fmtNum(b.bin[0], 2)}–${fmtNum(b.bin[1], 2)}`,
     value: b.count,
-    color: opts.colors ? opts.colors[i] : null
+    // A per-bin colour lets the caller encode meaning (e.g. decision band);
+    // otherwise the chart falls back to the single-hue ramp.
+    color: b.color || (opts.colors ? opts.colors[i] : null),
+    mid: MID(b)
   }));
   barChart(canvas, { items, horizontal: false });
 }
@@ -412,7 +435,7 @@ export function scatterChart(canvas, opts) {
         c.beginPath(); c.moveTo(pad + (plotW / 4) * i, pad); c.lineTo(pad + (plotW / 4) * i, pad + plotH); c.stroke();
         c.beginPath(); c.moveTo(pad, pad + (plotH / 4) * i); c.lineTo(pad + plotW, pad + (plotH / 4) * i); c.stroke();
       }
-      c.fillStyle = th.light ? 'rgba(24,40,100,0.035)' : 'rgba(148,173,255,0.05)';
+      c.fillStyle = th.light ? 'rgba(9,9,11,0.018)' : 'rgba(255,255,255,0.022)';
       roundRect(c, pad, pad, plotW, plotH, 14); c.fill();
       c.strokeStyle = th.axis; roundRect(c, pad, pad, plotW, plotH, 14); c.stroke();
 

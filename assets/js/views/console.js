@@ -105,7 +105,7 @@ export function initConsole(store) {
         h('span', { text: `rules: ${rec.normalized.rules.join(', ') || 'none'}` })),
       h('div', { class: 'rule-block' },
         h('span', { text: `attributes (${rec.specs.length})` }), attributePills(rec, 20)),
-      h('div', { class: 'rule-block' },
+      h('div', { class: 'rule-block json-block' },
         h('span', { text: 'standardized JSON' }),
         h('pre', { class: 'json', text: JSON.stringify({
           family: rec.family.id,

@@ -98,7 +98,7 @@ export function initMaster(store) {
     clear(body);
     const slice = items.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
     slice.forEach((m) => body.append(h('tr', { onclick: () => openItem(m) },
-      h('td', {}, h('code', { class: 'mono small', style: { color: 'var(--cyan)' }, text: m.code })),
+      h('td', {}, h('code', { class: 'mono small', style: { color: 'var(--accent)' }, text: m.code })),
       h('td', { class: 'cell-raw' }, h('span', { text: m.standardDescription })),
       h('td', {}, h('span', { class: 'pill', text: m.classLabel })),
       h('td', {}, h('span', { class: 'mono small', text: m.unit })),
@@ -116,7 +116,7 @@ export function initMaster(store) {
     const chart = qs('#chartCnmc');
     chart.dataset.height = '280';
     barChart(chart, {
-      items: [...byClass.entries()].sort((a, b) => b[1] - a[1]).map(([label, value], i) => ({ label, value, color: palette(i) })),
+      items: [...byClass.entries()].sort((a, b) => b[1] - a[1]).map(([label, value]) => ({ label, value })),
       horizontal: true, unit: 'records'
     });
   }

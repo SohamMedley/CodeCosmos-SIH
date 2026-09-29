@@ -64,11 +64,13 @@ export function initOverview(store) {
   }
 
   function setStatus(status) {
-    const chip = qs('#heroStatus');
-    const label = qs('#engineChip .pulse') ? qs('#engineLabel') : null;
+    const chip = qs('#heroChip');
     const nice = { idle: 'idle', running: 'processing', ready: 'ready' }[status] || status;
-    if (chip) chip.textContent = nice;
-    if (label) label.textContent = nice === 'processing' ? 'Processing' : nice === 'ready' ? 'Engine ready' : 'Idle';
+    if (chip) {
+      chip.querySelector('#heroStatus').textContent = nice;
+      chip.classList.toggle('is-running', status === 'running');
+      chip.classList.toggle('is-ready', status === 'ready');
+    }
   }
 
   store.on('progress', setProgress);
